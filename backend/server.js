@@ -1,18 +1,28 @@
+require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
+const connectDB = require("../database/db");
+
 const app = express();
 
-const connectDB = require("./database/db");
+// Connect to MongoDB
 connectDB();
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-// ROUTES
+// Routes
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
-// START SERVER
-const PORT = 5000;
+// Health check
+app.get("/", (req, res) => {
+    res.json({ message: "GymApp API is running" });
+});
 
+// Start server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
