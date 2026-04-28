@@ -16,6 +16,9 @@ app.use(express.json());
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
+const membershipRoutes = require("./routes/membershipRoutes");
+app.use("/api/memberships", membershipRoutes);
+
 // Health check
 app.get("/", (req, res) => {
     res.json({ message: "GymApp API is running" });
