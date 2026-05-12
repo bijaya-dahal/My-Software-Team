@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Everest Fitness - Nepal's Premier Gym Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="Gym project.css">
+</head>
+<body>
+
+<nav class="main-nav" id="main-nav">
+  <a href="#" class="logo">EVEREST FITNESS</a>
+  <button type="button" class="burger" id="burger-btn" onclick="toggleMenu()" aria-label="Toggle navigation menu">
+    <span class="bar bar-top"></span>
+    <span class="bar bar-mid"></span>
+    <span class="bar bar-bot"></span>
+  </button>
+</nav>
+
+<!-- slide-in menu -->
+<div class="slide-menu" id="slide-menu">
+  <div class="slide-menu-inner">
+    <p class="slide-eyebrow">Navigation</p>
+    <nav class="slide-nav">
+      <a href="#features"   class="slide-link" onclick="closeMenu()"><span class="sl-num">01</span>Features</a>
+      <a href="#membership" class="slide-link" onclick="closeMenu()"><span class="sl-num">02</span>Membership</a>
+      <a href="#about"      class="slide-link" onclick="closeMenu()"><span class="sl-num">03</span>About</a>
+      <button type="button" class="slide-link" onclick="closeMenu(); openModal('login')"><span class="sl-num">04</span>Log In</button>
+      <button type="button" class="slide-link slide-join" onclick="closeMenu(); openModal('register')"><span class="sl-num">05</span>Join Now</button>
+    </nav>
+    <div class="slide-divider"></div>
+    <button type="button" class="slide-exit" onclick="closeMenu()">
+      <i class="fas fa-arrow-left"></i>&nbsp; Exit Page
+    </button>
+  </div>
+</div>
+<div class="slide-backdrop" id="slide-backdrop" onclick="closeMenu()"></div>
+
+<nav class="profile-nav hidden" id="profile-nav">
+  <a href="#" class="logo">EVEREST FITNESS</a>
+  <div class="profile-nav-right">
+    <span id="nav-username"></span>
+    <a href="plan feature.html" class="profile-nav-link">Membership</a>
+    <a href="assign.html" class="profile-nav-link">Classes</a>
+    <button type="button" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- landing page -->
+<div id="page-landing">
+
+  <section class="hero">
+    <div class="hero-inner">
+      <!-- Removed hero-badge as requested -->
+      <h1 class="hero-title">EVEREST FITNESS</h1>
+      <p class="hero-tag">Inspired by the Himalayas &mdash; Built for Champions</p>
+      <p class="hero-sub">
+        Train hard. Rise higher. Join Kathmandu's most trusted gym, Everest Fitness, and start your fitness journey today.
+      </p>
+      <p class="hero-health">Health is wealth &mdash; when you are well, you conquer the world.</p>
+      <div class="hero-btns">
+        <button type="button" class="btn-primary" onclick="openModal('register')">Start Free Today</button>
+        <a href="#features" class="btn-outline">Explore More</a>
+      </div>
+    </div>
+    <a href="#features" class="scroll-down" aria-label="Scroll to features">
+      <i class="fas fa-chevron-down"></i>
+    </a>
+  </section>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-n">1,200+</div><div class="stat-l">Active Members</div></div>
+    <div class="stat"><div class="stat-n">30+</div><div class="stat-l">Expert Trainers</div></div>
+    <div class="stat"><div class="stat-n">60+</div><div class="stat-l">Weekly Classes</div></div>
+    <div class="stat"><div class="stat-n">5 &#9733;</div><div class="stat-l">Member Rating</div></div>
+  </div>
+
+  <section class="section dark-bg" id="features">
+    <div class="sec-header">
+      <span class="eyebrow">All You Need</span>
+      <h2>EVEREST FITNESS <span>FACILITIES</span></h2>
+      <p>
+        From Kathmandu to Pokhara, all you need to reach your peak performance is right here at Everest Fitness, all in one platform.
+      </p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-dumbbell"></i></div>
+        <h3>State-of-the-Art Equipment</h3>
+        <p>
+          International-grade machines and free weights maintained to the highest standard,
+          right here in Nepal.
+        </p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-user-tie"></i></div>
+        <h3>Certified Nepali Trainers</h3>
+        <p>
+          Work with nationally and internationally certified personal trainers who
+          understand your body, your goals, and your lifestyle.
+        </p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-calendar-check"></i></div>
+        <h3>Flexible Class Scheduling</h3>
+        <p>
+          Book Zumba, yoga, HIIT, martial arts and more in seconds.
+          Classes run mornings and evenings to fit your schedule.
+        </p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-chart-line"></i></div>
+        <h3>Progress Tracking</h3>
+        <p>
+          Monitor your workout history, trainer sessions, and monthly milestones
+          from your personal member dashboard.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery-section">
+    <div class="sec-header">
+      <span class="eyebrow">Inside Everest Fitness</span>
+      <h2>TRAIN LIKE A <span>CHAMPION</span></h2>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <img src="Photo of Agile Projects/cover page.jpg" alt="Everest Fitness Gym">
+      </div>
+      <div class="gallery-item">
+        <img src="Photo of Agile Projects/fitness picture.jpg" alt="Fitness Training">
+      </div>
+      <div class="gallery-item">
+        <img src="Photo of Agile Projects/fitness picture 2.jpg" alt="Gym Workout">
+      </div>
+    </div>
+  </section>
+
+  <section class="section darker-bg" id="membership">
+    <div class="sec-header">
+      <span class="eyebrow">Choose Your Plan</span>
+      <h2>EVEREST FITNESS <span>MEMBERSHIP PLANS</span></h2>
+      <p>Affordable plans for every goal at Everest Fitness. All prices in Nepalese Rupees. Cancel anytime.</p>
+    </div>
+    <div class="plans-grid">
+
+      <div class="plan-card">
+        <div class="plan-name">Basic</div>
+        <div class="plan-price"><sup>£</sup>12.99<sub>/mo</sub></div>
+        <hr>
+        <ul class="plan-features">
+          <li><i class="fas fa-check-circle"></i> Gym floor access</li>
+          <li><i class="fas fa-check-circle"></i> 2 group classes/month</li>
+          <li><i class="fas fa-check-circle"></i> Member dashboard</li>
+          <li class="off"><i class="fas fa-times-circle"></i> Personal trainer</li>
+          <li class="off"><i class="fas fa-times-circle"></i> Priority booking</li>
+        </ul>
+        <button type="button" class="btn-plan btn-plan-outline" onclick="openModal('register')">Get Started</button>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-name">Premium</div>
+        <div class="plan-price"><sup>£</sup>24.99<sub>/mo</sub></div>
+        <hr>
+        <ul class="plan-features">
+          <li><i class="fas fa-check-circle"></i> Gym floor access</li>
+          <li><i class="fas fa-check-circle"></i> Unlimited group classes</li>
+          <li><i class="fas fa-check-circle"></i> Member dashboard</li>
+          <li><i class="fas fa-check-circle"></i> 2 PT sessions/month</li>
+          <li class="off"><i class="fas fa-times-circle"></i> Priority booking</li>
+        </ul>
+        <button type="button" class="btn-plan btn-plan-outline" onclick="openModal('register')">Get Started</button>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-name">Elite</div>
+        <div class="plan-price"><sup>£</sup>49.99<sub>/mo</sub></div>
+        <hr>
+        <ul class="plan-features">
+          <li><i class="fas fa-check-circle"></i> Gym floor access</li>
+          <li><i class="fas fa-check-circle"></i> Unlimited group classes</li>
+          <li><i class="fas fa-check-circle"></i> Member dashboard</li>
+          <li><i class="fas fa-check-circle"></i> Unlimited PT sessions</li>
+          <li><i class="fas fa-check-circle"></i> Priority booking</li>
+        </ul>
+        <button type="button" class="btn-plan btn-plan-outline" onclick="openModal('register')">Get Started</button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="section dark-bg" id="about">
+    <div class="why-wrap">
+      <div class="why-img"></div>
+      <div class="why-content">
+        <span class="eyebrow">Why Choose Us</span>
+        <h2>MORE THAN <span>EVEREST FITNESS</span></h2>
+        <ul class="why-list">
+          <li>
+            <div class="why-icon"><i class="fas fa-mountain"></i></div>
+            <div>
+              <h4>Born in Nepal, Built for Nepalis</h4>
+              <p>
+                Designed specifically for Nepal's fitness community — with Nepali trainers,
+                local pricing, and a platform that understands your needs.
+              </p>
+            </div>
+          </li>
+          <li>
+            <div class="why-icon"><i class="fas fa-shield-alt"></i></div>
+            <div>
+              <h4>Safe, Inclusive Environment</h4>
+              <p>
+                From beginners to competitive athletes — everyone is welcome
+                and supported at Everest Fitness.
+              </p>
+            </div>
+          </li>
+          <li>
+            <div class="why-icon"><i class="fas fa-headset"></i></div>
+            <div>
+              <h4>Local Support, Always Available</h4>
+              <p>
+                Our Nepali support team speaks your language and is always on hand
+                to help with membership, bookings, or any questions.
+              </p>
+            </div>
+          </li>
+          <li>
+            <div class="why-icon"><i class="fas fa-sync-alt"></i></div>
+            <div>
+              <h4>No Lock-In, Full Flexibility</h4>
+              <p>
+                Monthly billing in NPR. Pause or cancel your membership anytime —
+                no extra charges, no complications.
+              </p>
+            </div>
+          </li>
+        </ul>
+        <button type="button" class="btn-primary" onclick="openModal('register')">Join Today</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <h2>READY TO REACH <span>YOUR PEAK?</span></h2>
+    <p>
+      Join over 1,200 members across Nepal already transforming their lives
+      at Everest Fitness.
+    </p>
+    <div class="cta-btns">
+      <button type="button" class="btn-primary" onclick="openModal('register')">Create Free Account</button>
+      <button type="button" class="btn-outline" onclick="openModal('login')">Log In</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <a href="#" class="logo footer-logo">EVEREST FITNESS</a>
+        <p class="footer-desc">
+          Everest Fitness — Nepal's premier gym management platform. Proudly based in Kathmandu, serving fitness enthusiasts across the country.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Members</h4>
+        <ul>
+          <li><a href="#" onclick="openModal('login');return false">Log In</a></li>
+          <li><a href="#" onclick="openModal('register');return false">Register</a></li>
+          <li><a href="#membership">Pricing (NPR)</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Everest Fitness</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#membership">Membership</a></li>
+          <li><a href="#about">About Us</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Help Centre</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Everest Fitness Nepal. All rights reserved.</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- profile page -->
+<div id="page-profile" class="hidden">
+  <div class="profile-wrap">
+    <div class="profile-card">
+
+      <div class="avatar-section">
+        <div class="avatar" id="profile-avatar">--</div>
+        <h2 id="profile-name">Loading...</h2>
+        <p id="profile-email"></p>
+        <span class="role-badge" id="profile-role">Member</span>
+      </div>
+
+      <div class="alert success-alert" id="success-msg">Profile updated successfully!</div>
+      <div class="alert error-alert" id="error-msg">Something went wrong. Please try again.</div>
+
+      <div id="view-mode">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Full Name</span>
+            <span class="info-value" id="view-name">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email Address</span>
+            <span class="info-value" id="view-email">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Phone Number</span>
+            <span class="info-value" id="view-phone">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Date of Birth</span>
+            <span class="info-value" id="view-dob">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Address</span>
+            <span class="info-value" id="view-address">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Member Since</span>
+            <span class="info-value" id="view-joined">-</span>
+          </div>
+        </div>
+        <button type="button" class="btn-edit" onclick="showEditMode()">Edit Profile</button>
+      </div>
+
+      <div id="edit-mode" class="hidden">
+        <div class="form-group">
+          <label for="edit-name">Full Name</label>
+          <input type="text" id="edit-name" placeholder="Your full name">
+          <div class="field-error" id="edit-name-err">Name cannot be empty.</div>
+        </div>
+        <div class="form-group">
+          <label for="edit-email">Email Address</label>
+          <input type="email" id="edit-email" disabled>
+          <small class="field-note">Email address cannot be changed.</small>
+        </div>
+        <div class="form-group">
+          <label for="edit-phone">Phone Number</label>
+          <input type="tel" id="edit-phone" placeholder="+977 98XX XXX XXX">
+        </div>
+        <div class="form-group">
+          <label for="edit-dob">Date of Birth</label>
+          <input type="date" id="edit-dob">
+        </div>
+        <div class="form-group">
+          <label for="edit-address">Address</label>
+          <input type="text" id="edit-address" placeholder="Kathmandu, Lalitpur, Pokhara...">
+        </div>
+        <div class="edit-actions">
+          <button type="button" class="btn-save" id="save-btn" onclick="saveProfile()">Save Changes</button>
+          <button type="button" class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- auth modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
+  <div class="modal-box">
+    <button type="button" class="modal-close" onclick="closeModal()" aria-label="Close">&#x2715;</button>
+
+    <div class="modal-logo">EVEREST FITNESS</div>
+    <p class="modal-sub">Nepal's premier gym management platform.</p>
+
+    <div class="modal-tabs">
+      <button type="button" class="tab active" id="tab-login" onclick="showTab('login')">Log In</button>
+      <button type="button" class="tab" id="tab-register" onclick="showTab('register')">Register</button>
+    </div>
+
+    <div id="login-section">
+      <h3>Welcome Back</h3>
+      <div class="alert suc" id="reg-done-msg">Account created! You can now log in.</div>
+      <div class="alert err" id="login-err-msg">Invalid email or password.</div>
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <input type="email" id="login-email" placeholder="you@example.com">
+        <div class="field-error" id="login-email-err">Please enter a valid email.</div>
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="login-password" placeholder="Enter your password">
+          <button type="button" class="pw-toggle" onclick="togglePw('login-password', this)">Show</button>
+        </div>
+        <div class="field-error" id="login-pw-err">Password is required.</div>
+      </div>
+      <button type="button" class="btn-submit" id="login-btn" onclick="doLogin()">Log In</button>
+      <div class="switch-link">
+        Don't have an account? <button type="button" onclick="showTab('register')">Register here</button>
+      </div>
+    </div>
+
+    <div id="register-section" class="hidden">
+      <h3>Create Account</h3>
+      <div class="alert err" id="reg-err-msg">Please fix the errors above.</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-fname">First Name</label>
+          <input type="text" id="reg-fname" placeholder="Aarav">
+          <div class="field-error" id="reg-fname-err">Required.</div>
+        </div>
+        <div class="form-group">
+          <label for="reg-lname">Last Name</label>
+          <input type="text" id="reg-lname" placeholder="Sharma">
+          <div class="field-error" id="reg-lname-err">Required.</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Email Address</label>
+        <input type="email" id="reg-email" placeholder="you@example.com">
+        <div class="field-error" id="reg-email-err">Enter a valid email address.</div>
+      </div>
+      <div class="form-group">
+        <label for="reg-role">Role</label>
+        <select id="reg-role">
+          <option value="member">Member</option>
+          <option value="trainer">Trainer</option>
+          <option value="staff">Staff</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="reg-phone">Phone Number</label>
+        <input type="tel" id="reg-phone" placeholder="+977 98XX XXX XXX">
+        <div class="field-error" id="reg-phone-err">Phone number is required.</div>
+      </div>
+      <div class="form-group">
+        <label for="reg-dob">Date of Birth</label>
+        <input type="date" id="reg-dob">
+        <div class="field-error" id="reg-dob-err">Date of birth is required.</div>
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="reg-password" placeholder="Min. 8 characters">
+          <button type="button" class="pw-toggle" onclick="togglePw('reg-password', this)">Show</button>
+        </div>
+        <div class="field-error" id="reg-pw-err">Password must be at least 8 characters.</div>
+      </div>
+      <div class="form-group">
+        <label for="reg-password2">Confirm Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="reg-password2" placeholder="Repeat your password">
+          <button type="button" class="pw-toggle" onclick="togglePw('reg-password2', this)">Show</button>
+        </div>
+        <div class="field-error" id="reg-pw2-err">Passwords do not match.</div>
+      </div>
+      <div class="form-group">
+        <div class="terms-row">
+          <input type="checkbox" id="reg-terms">
+          <label for="reg-terms">I agree to the <a href="#">Terms &amp; Conditions</a> and Privacy Policy.</label>
+        </div>
+        <div class="field-error" id="reg-terms-err">You must accept the terms to register.</div>
+      </div>
+      <button type="button" class="btn-submit" id="reg-btn" onclick="doRegister()">Create Account</button>
+      <div class="switch-link">
+        Already a member? <button type="button" onclick="showTab('login')">Log in here</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="Gym project.js"></script>
+</body>
+</html>

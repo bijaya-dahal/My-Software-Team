@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Membership Plans &amp; Billing - Everest Fitness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="plan feature.css">
+</head>
+<body>
+
+<nav class="plan-nav">
+  <a href="Gym project.html" class="logo">EVEREST<span> FITNESS</span></a>
+  <span class="nav-tag">Membership Plans &amp; Billing</span>
+  <a href="Gym project.html" class="btn-back">
+    <i class="fas fa-arrow-left"></i> Back to Home
+  </a>
+</nav>
+
+<main>
+  
+  <section class="section" id="plans">
+    <div class="sec-header">
+      <span class="eyebrow">Choose Your Plan</span>
+      <h2>MEMBERSHIP <span>PLANS</span></h2>
+      <p>Affordable plans for every goal. All prices in Nepalese Rupees. Cancel anytime.</p>
+    </div>
+
+    <!-- Cards rendered by JS from /api/memberships/plans -->
+    <div class="plans-grid" id="plans-grid">
+      <div class="plans-loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading plans&hellip;
+      </div>
+    </div>
+  </section>
+
+  <!-- Billing section -->
+  <section class="section billing-section" id="billing">
+
+    <!-- Active subscription banner (shown when member already has one) -->
+    <div class="active-sub-banner hidden" id="active-sub-banner">
+      <div class="banner-inner">
+        <i class="fas fa-check-circle"></i>
+        You have an active subscription:
+        <strong id="active-plan-name"></strong> &mdash;
+        valid until <strong id="active-end-date"></strong>
+      </div>
+    </div>
+
+    <div class="sec-header">
+      <span class="eyebrow">Your Subscription</span>
+      <h2>BILLING <span>DETAILS</span></h2>
+      <p>Review your selected plan and complete your subscription below.</p>
+    </div>
+
+    <div class="billing-wrap">
+
+      <!-- Order summary -->
+      <div class="billing-summary" id="billing-summary">
+        <h3>Order Summary</h3>
+        <div class="summary-row">
+          <span>Selected Plan</span>
+          <span id="summary-plan">&#8212; No plan selected &#8212;</span>
+        </div>
+        <div class="summary-row">
+          <span>Billing Cycle</span>
+          <span id="summary-duration">Monthly</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total Due</span>
+          <span id="summary-total">£0</span>
+        </div>
+        <p class="billing-note">
+          <i class="fas fa-shield-alt"></i> Cancel anytime. No hidden charges.
+        </p>
+      </div>
+
+      <!-- Payment form -->
+      <div class="billing-form">
+        <h3>Payment Information</h3>
+
+        <div class="alert success-alert" id="pay-success">
+          Subscription activated! Welcome aboard.
+        </div>
+        <div class="alert error-alert" id="pay-error">
+          Please fix the errors below.
+        </div>
+
+        <!-- Shown when user is not logged in -->
+        <div class="auth-notice hidden" id="auth-notice">
+          <i class="fas fa-lock"></i>
+          Please <a href="Gym project.html">log in</a> to subscribe to a plan.
+        </div>
+
+        <!-- Hidden when user is not logged in -->
+        <div id="billing-form-inner">
+
+          <div class="form-group">
+            <label for="pay-name">Full Name</label>
+            <input type="text" id="pay-name" placeholder="Your full name">
+            <div class="field-error" id="pay-name-err">Name is required.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="pay-email">Email Address</label>
+            <input type="email" id="pay-email" placeholder="you@example.com">
+            <div class="field-error" id="pay-email-err">Enter a valid email.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="pay-plan">Membership Plan</label>
+            <!-- Options populated by JS after plans are fetched -->
+            <select id="pay-plan" onchange="onPlanDropdownChange()">
+              <option value="">&#8212; Select a plan &#8212;</option>
+            </select>
+            <div class="field-error" id="pay-plan-err">Please select a plan.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="pay-method">Payment Method</label>
+            <select id="pay-method">
+              <option value="">&#8212; Select method &#8212;</option>
+              <option value="cash">Pay at Counter</option>
+              <option value="card">Credit / Debit Card</option>
+              <option value="online">Online Transfer</option>
+            </select>
+            <div class="field-error" id="pay-method-err">Please select a payment method.</div>
+          </div>
+
+          <button type="button" class="btn-submit" id="pay-btn" onclick="submitPayment()">
+            Confirm &amp; Subscribe
+          </button>
+
+        </div><!-- /billing-form-inner -->
+      </div><!-- /billing-form -->
+
+    </div><!-- /billing-wrap -->
+  </section>
+
+  <!-- Billing history -->
+  <section class="section history-section" id="history">
+    <div class="sec-header">
+      <span class="eyebrow">Payment Records</span>
+      <h2>BILLING <span>HISTORY</span></h2>
+      <p>A record of your recent payments and subscription activations.</p>
+    </div>
+
+    <div class="history-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Plan</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="history-body">
+          <tr class="empty-row">
+            <td colspan="5">No payment history yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="plan-footer">
+  <span>&copy; 2026 Everest Fitness Nepal. All rights reserved.</span>
+  <span>Made with &hearts; in Kathmandu, Nepal</span>
+</footer>
+
+<script src="plan feature.js"></script>
+</body>
+</html>
