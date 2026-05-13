@@ -40,10 +40,10 @@
 <div class="slide-backdrop" id="slide-backdrop" onclick="closeMenu()"></div>
 
 <nav class="profile-nav hidden" id="profile-nav">
-  <a href="#" class="logo">EVEREST FITNESS</a>
+  <a href="#" class="logo" onclick="showPage('profile'); return false;">EVEREST FITNESS</a>
   <div class="profile-nav-right">
     <span id="nav-username"></span>
-    <a href="plan feature.html" class="profile-nav-link">Membership</a>
+    <button type="button" class="profile-nav-link profile-nav-btn" onclick="showPage('plans')">Membership</button>
     <a href="assign.html" class="profile-nav-link">Classes</a>
     <button type="button" onclick="logout()">Logout</button>
   </div>
@@ -52,15 +52,17 @@
 <!-- landing page -->
 <div id="page-landing">
 
+  <!-- Hero section with HD gym cover photo -->
   <section class="hero">
     <div class="hero-inner">
-      <!-- Removed hero-badge as requested -->
       <h1 class="hero-title">EVEREST FITNESS</h1>
       <p class="hero-tag">Inspired by the Himalayas &mdash; Built for Champions</p>
-      <p class="hero-sub">
-        Train hard. Rise higher. Join Kathmandu's most trusted gym, Everest Fitness, and start your fitness journey today.
-      </p>
-      <p class="hero-health">Health is wealth &mdash; when you are well, you conquer the world.</p>
+      <p class="hero-sub">Train hard. Rise higher. Join Kathmandu's most trusted gym, Everest Fitness, and start your fitness journey today.</p>
+      <div class="hero-health">
+        <span class="health-line"></span>
+        <span class="health-text">Health is wealth &mdash; when you are well, you conquer the world.</span>
+        <span class="health-line"></span>
+      </div>
       <div class="hero-btns">
         <button type="button" class="btn-primary" onclick="openModal('register')">Start Free Today</button>
         <a href="#features" class="btn-outline">Explore More</a>
@@ -75,7 +77,7 @@
     <div class="stat"><div class="stat-n">1,200+</div><div class="stat-l">Active Members</div></div>
     <div class="stat"><div class="stat-n">30+</div><div class="stat-l">Expert Trainers</div></div>
     <div class="stat"><div class="stat-n">60+</div><div class="stat-l">Weekly Classes</div></div>
-    <div class="stat"><div class="stat-n">5 &#9733;</div><div class="stat-l">Member Rating</div></div>
+    <div class="stat"><div class="stat-n">5 ★</div><div class="stat-l">Member Rating</div></div>
   </div>
 
   <section class="section dark-bg" id="features">
@@ -129,13 +131,13 @@
     </div>
     <div class="gallery-grid">
       <div class="gallery-item">
-        <img src="Photo of Agile Projects/cover page.jpg" alt="Everest Fitness Gym">
+        <img src="Photo of Agile Projects/fitness picture 2.jpg" alt="Gym Floor">
       </div>
       <div class="gallery-item">
-        <img src="Photo of Agile Projects/fitness picture.jpg" alt="Fitness Training">
+        <img src="Photo of Agile Projects/cover picture.png" alt="Personal Training">
       </div>
       <div class="gallery-item">
-        <img src="Photo of Agile Projects/fitness picture 2.jpg" alt="Gym Workout">
+        <img src="Photo of Agile Projects/fitness picture.jpg" alt="Cardio Area">
       </div>
     </div>
   </section>
@@ -144,7 +146,7 @@
     <div class="sec-header">
       <span class="eyebrow">Choose Your Plan</span>
       <h2>EVEREST FITNESS <span>MEMBERSHIP PLANS</span></h2>
-      <p>Affordable plans for every goal at Everest Fitness. All prices in Nepalese Rupees. Cancel anytime.</p>
+      <p>Affordable plans for every goal at Everest Fitness. All prices in Pound Sterling (£). Cancel anytime.</p>
     </div>
     <div class="plans-grid">
 
@@ -235,7 +237,7 @@
             <div>
               <h4>No Lock-In, Full Flexibility</h4>
               <p>
-                Monthly billing in NPR. Pause or cancel your membership anytime —
+                Monthly billing in Pounds. Pause or cancel your membership anytime —
                 no extra charges, no complications.
               </p>
             </div>
@@ -271,7 +273,7 @@
         <ul>
           <li><a href="#" onclick="openModal('login');return false">Log In</a></li>
           <li><a href="#" onclick="openModal('register');return false">Register</a></li>
-          <li><a href="#membership">Pricing (NPR)</a></li>
+          <li><a href="#membership">Pricing (£)</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -376,10 +378,222 @@
   </div>
 </div>
 
+<!-- plans / billing page -->
+<div id="page-plans" class="hidden">
+
+  <section class="section" id="plans">
+    <div class="sec-header">
+      <span class="eyebrow">Choose Your Plan</span>
+      <h2>MEMBERSHIP <span>PLANS</span></h2>
+      <p>Affordable plans for every goal. All prices in pound sterling. Cancel anytime.</p>
+    </div>
+    <div class="plans-grid" id="plans-grid">
+      <div class="plans-loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading plans&hellip;
+      </div>
+    </div>
+  </section>
+
+  <section class="section billing-section" id="billing">
+
+    <div class="active-sub-banner hidden" id="active-sub-banner">
+      <div class="banner-inner">
+        <i class="fas fa-check-circle"></i>
+        You have an active subscription:
+        <strong id="active-plan-name"></strong> &mdash;
+        valid until <strong id="active-end-date"></strong>
+        <button type="button" class="btn-renew-quick" onclick="scrollToRenewal()">
+          <i class="fas fa-sync-alt"></i> Renew
+        </button>
+      </div>
+    </div>
+
+    <div class="sec-header">
+      <span class="eyebrow">Your Subscription</span>
+      <h2>BILLING <span>DETAILS</span></h2>
+      <p>Review your selected plan and complete your subscription below.</p>
+    </div>
+
+    <div class="billing-wrap">
+
+      <div class="billing-summary" id="billing-summary">
+        <h3>Order Summary</h3>
+        <div class="summary-row">
+          <span>Selected Plan</span>
+          <span id="summary-plan">&mdash; No plan selected &mdash;</span>
+        </div>
+        <div class="summary-row">
+          <span>Billing Cycle</span>
+          <span id="summary-duration">Monthly</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total Due</span>
+          <span id="summary-total">£0</span>
+        </div>
+        <p class="billing-note">
+          <i class="fas fa-shield-alt"></i> Cancel anytime. No hidden charges.
+        </p>
+      </div>
+
+      <div class="billing-form">
+        <h3>Payment Information</h3>
+
+        <div class="alert success-alert" id="pay-success">
+          Subscription activated! Welcome aboard.
+        </div>
+        <div class="alert error-alert" id="pay-error">
+          Please fix the errors below.
+        </div>
+
+        <div class="auth-notice hidden" id="auth-notice">
+          <i class="fas fa-lock"></i>
+          Please <button type="button" onclick="openModal('login')">log in</button> to subscribe to a plan.
+        </div>
+
+        <div id="billing-form-inner">
+
+          <div class="form-group">
+            <label for="pay-name">Full Name</label>
+            <input type="text" id="pay-name" placeholder="Your full name">
+            <div class="field-error" id="pay-name-err">Name is required.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="pay-email">Email Address</label>
+            <input type="email" id="pay-email" placeholder="you@example.com">
+            <div class="field-error" id="pay-email-err">Enter a valid email.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="pay-plan">Membership Plan</label>
+            <select id="pay-plan" onchange="onPlanDropdownChange()">
+              <option value="">&mdash; Select a plan &mdash;</option>
+            </select>
+            <div class="field-error" id="pay-plan-err">Please select a plan.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="pay-method">Payment Method</label>
+            <select id="pay-method">
+              <option value="">&mdash; Select method &mdash;</option>
+              <option value="cash">Pay at Counter</option>
+              <option value="card">Credit / Debit Card</option>
+              <option value="online">Online Transfer</option>
+            </select>
+            <div class="field-error" id="pay-method-err">Please select a payment method.</div>
+          </div>
+
+          <button type="button" class="btn-submit" id="pay-btn" onclick="submitPayment()">
+            Confirm &amp; Subscribe
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="section renewal-section hidden" id="renewal-section">
+    <div class="sec-header">
+      <span class="eyebrow">Extend Your Membership</span>
+      <h2>RENEW <span>MEMBERSHIP</span></h2>
+      <p>Renew your current plan or switch to a new one. Renewal extends from your current expiry date.</p>
+    </div>
+
+    <div class="billing-wrap">
+
+      <div class="billing-summary">
+        <h3>Renewal Summary</h3>
+        <div class="summary-row">
+          <span>Current Plan</span>
+          <span id="renew-current-plan">&mdash;</span>
+        </div>
+        <div class="summary-row">
+          <span>Expires On</span>
+          <span id="renew-expiry">&mdash;</span>
+        </div>
+        <div class="summary-row">
+          <span>Renew With</span>
+          <span id="renew-new-plan">Same Plan</span>
+        </div>
+        <div class="summary-row total">
+          <span>Renewal Fee</span>
+          <span id="renew-total">£0</span>
+        </div>
+        <p class="billing-note">
+          <i class="fas fa-calendar-check"></i> Renewal extends from your current expiry date, not today.
+        </p>
+      </div>
+
+      <div class="billing-form">
+        <h3>Confirm Renewal</h3>
+
+        <div class="alert success-alert" id="renew-success">
+          Membership renewed successfully!
+        </div>
+        <div class="alert error-alert" id="renew-error">
+          Please fix the errors below.
+        </div>
+
+        <div class="form-group">
+          <label for="renew-plan">Plan to Renew</label>
+          <select id="renew-plan" onchange="onRenewPlanChange()">
+            <option value="">&mdash; Same as current plan &mdash;</option>
+          </select>
+          <small class="field-note">Leave blank to renew with your current plan.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="renew-method">Payment Method</label>
+          <select id="renew-method">
+            <option value="">&mdash; Select method &mdash;</option>
+            <option value="cash">Pay at Counter</option>
+            <option value="card">Credit / Debit Card</option>
+            <option value="online">Online Transfer</option>
+          </select>
+          <div class="field-error" id="renew-method-err">Please select a payment method.</div>
+        </div>
+
+        <button type="button" class="btn-submit" id="renew-btn" onclick="submitRenewal()">
+          <i class="fas fa-sync-alt"></i>&nbsp; Confirm Renewal
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="section history-section" id="history">
+    <div class="sec-header">
+      <span class="eyebrow">Payment Records</span>
+      <h2>BILLING <span>HISTORY</span></h2>
+      <p>A record of your recent payments and subscription activations.</p>
+    </div>
+    <div class="history-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Plan</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="history-body">
+          <tr class="empty-row">
+            <td colspan="5">No payment history yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
 <!-- auth modal -->
 <div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
   <div class="modal-box">
-    <button type="button" class="modal-close" onclick="closeModal()" aria-label="Close">&#x2715;</button>
+    <button type="button" class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
 
     <div class="modal-logo">EVEREST FITNESS</div>
     <p class="modal-sub">Nepal's premier gym management platform.</p>
@@ -418,12 +632,12 @@
       <div class="form-row">
         <div class="form-group">
           <label for="reg-fname">First Name</label>
-          <input type="text" id="reg-fname" placeholder="Aarav">
+          <input type="text" id="reg-fname" placeholder="Ram">
           <div class="field-error" id="reg-fname-err">Required.</div>
         </div>
         <div class="form-group">
           <label for="reg-lname">Last Name</label>
-          <input type="text" id="reg-lname" placeholder="Sharma">
+          <input type="text" id="reg-lname" placeholder="Khadka">
           <div class="field-error" id="reg-lname-err">Required.</div>
         </div>
       </div>
