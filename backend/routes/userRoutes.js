@@ -10,11 +10,16 @@ const {
 
 const { protect } = require("../middleware/authMiddleware");
 
+// ✅ TEST ROUTE (add this)
+router.get("/", (req, res) => {
+    res.json({ message: "Users route is working" });
+});
+
 // Public
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 
-// Private (token required)
+// Private
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);
 

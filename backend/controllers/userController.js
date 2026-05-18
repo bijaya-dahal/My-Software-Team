@@ -7,9 +7,8 @@ const generateToken = (id, role) => {
     });
 };
 
-// @route  POST /api/users/register
-// @access Public
 const registerUser = async(req, res) => {
+    console.log("Register hit!", req.body);
     try {
         const { name, email, password, role, phone, dateOfBirth, address } = req.body;
 
@@ -45,13 +44,11 @@ const registerUser = async(req, res) => {
             token: generateToken(user._id, user.role),
         });
     } catch (error) {
-        console.error("Register error:", error.message);
-        res.status(500).json({ message: "Server error during registration" });
+        console.error("Register error:", error);
+        res.status(500).json({ message: error.message });
     }
 };
 
-// @route  POST /api/users/login
-// @access Public
 const loginUser = async(req, res) => {
     try {
         const { email, password } = req.body;
@@ -86,13 +83,11 @@ const loginUser = async(req, res) => {
             token: generateToken(user._id, user.role),
         });
     } catch (error) {
-        console.error("Login error:", error.message);
-        res.status(500).json({ message: "Server error during login" });
+        console.error("Login error:", error);
+        res.status(500).json({ message: error.message });
     }
 };
 
-// @route  GET /api/users/profile
-// @access Private
 const getUserProfile = async(req, res) => {
     try {
         const user = await User.findById(req.user.id).select("-password");
@@ -101,13 +96,11 @@ const getUserProfile = async(req, res) => {
         }
         res.status(200).json({ user });
     } catch (error) {
-        console.error("Profile error:", error.message);
-        res.status(500).json({ message: "Server error fetching profile" });
+        console.error("Profile error:", error);
+        res.status(500).json({ message: error.message });
     }
 };
 
-// @route  PUT /api/users/profile
-// @access Private
 const updateUserProfile = async(req, res) => {
     try {
         const { name, phone, dateOfBirth, address } = req.body;
@@ -137,8 +130,8 @@ const updateUserProfile = async(req, res) => {
             },
         });
     } catch (error) {
-        console.error("Update profile error:", error.message);
-        res.status(500).json({ message: "Server error updating profile" });
+        console.error("Update profile error:", error);
+        res.status(500).json({ message: error.message });
     }
 };
 
