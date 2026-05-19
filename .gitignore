@@ -1,0 +1,9 @@
+# Environment variables - NEVER push this
+.env
+
+# Node modules - too large to push
+node_modules/
+backend/node_modules/
+
+# Mac system file
+.DS_Store
