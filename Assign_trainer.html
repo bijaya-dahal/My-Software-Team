@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Assign Trainer</title>
+    <link rel="stylesheet" href="assign_trainer.css">
+</head>
+<body>
+    <main class="page-wrapper">
+        <header>
+            <h1>Assign Trainer</h1>
+            <p class="subtitle">Add trainer assignments for gym classes and track hours.</p>
+        </header>
+
+        <section class="form-grid">
+            <div class="form-group">
+                <label for="trainerName">Trainer Name</label>
+                <input id="trainerName" type="text" placeholder="e.g. Alex Carter">
+            </div>
+            <div class="form-group">
+                <label for="classType">Class Type</label>
+                <select id="classType">
+                    <option value="">Select class</option>
+                    <option value="Yoga">Yoga</option>
+                    <option value="Zumba">Zumba</option>
+                    <option value="Cardio">Cardio</option>
+                    <option value="Strength Training">Strength Training</option>
+                    <option value="CrossFit">CrossFit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sessionDate">Session Date</label>
+                <input id="sessionDate" type="date">
+            </div>
+            <div class="form-group">
+                <label for="sessionHours">Hours</label>
+                <input id="sessionHours" type="number" min="1" placeholder="Enter hours">
+            </div>
+            <div class="form-group full-width">
+                <label for="notes">Notes</label>
+                <textarea id="notes" placeholder="Special instructions or class notes"></textarea>
+            </div>
+        </section>
+
+        <div class="button-group">
+            <button id="assignButton">Assign Trainer</button>
+            <button id="resetButton" type="button">Clear</button>
+        </div>
+
+        <section class="assignment-table">
+            <h2>Trainer Assignments</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trainer</th>
+                        <th>Class</th>
+                        <th>Date</th>
+                        <th>Hours</th>
+                        <th>Notes</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="assignmentBody"></tbody>
+            </table>
+        </section>
+
+        <div class="summary-box">
+            <span>Total Trainer Hours:</span>
+            <strong id="totalHours">0</strong>
+        </div>
+    </main>
+
+    <script src="assign_trainer.js"></script>
+</body>
+</html>
