@@ -1,6 +1,7 @@
 const USER_API = 'http://localhost:5000/api/users';
 const MEMBERSHIP_API = 'http://localhost:5000/api/memberships';
 
+
 // Get token from local storage
 function getToken() {
   return localStorage.getItem('ef_token');
@@ -13,6 +14,9 @@ function showPage(page) {
   document.getElementById('page-landing').classList.toggle('hidden', page !== 'landing');
   document.getElementById('page-profile').classList.toggle('hidden', page !== 'profile');
   document.getElementById('page-plans').classList.toggle('hidden',   page !== 'plans');
+  document.getElementById('page-classes').classList.toggle('hidden', page !== 'classes');
+  document.getElementById('page-trainer').classList.toggle('hidden', page !== 'trainer');
+  if (page === 'classes') loadClasses();
   document.getElementById('main-nav').classList.toggle('hidden',     page !== 'landing');
   document.getElementById('profile-nav').classList.toggle('hidden',  page === 'landing');
   window.scrollTo(0, 0);
@@ -126,6 +130,7 @@ async function doRegister() {
   var email = document.getElementById('reg-email').value.trim().toLowerCase();
   var phone = document.getElementById('reg-phone').value.trim();
   var dob   = document.getElementById('reg-dob').value;
+  var city  = document.getElementById('reg-city').value.trim();
   var pw    = document.getElementById('reg-password').value;
   var pw2   = document.getElementById('reg-password2').value;
   var terms = document.getElementById('reg-terms').checked;
@@ -135,9 +140,10 @@ async function doRegister() {
   if (!lname) { showFieldErr('reg-lname-err', 'reg-lname'); bad = true; }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('reg-email-err', 'reg-email'); bad = true; }
   if (!phone) { showFieldErr('reg-phone-err', 'reg-phone'); bad = true; }
-  if (!dob) { showFieldErr('reg-dob-err', 'reg-dob'); bad = true; }
-  if (pw.length < 8) { showFieldErr('reg-pw-err', 'reg-password'); bad = true; }
-  if (pw !== pw2) { showFieldErr('reg-pw2-err', 'reg-password2'); bad = true; }
+  if (!dob)   { showFieldErr('reg-dob-err',   'reg-dob');   bad = true; }
+  if (!city)  { showFieldErr('reg-city-err',  'reg-city');  bad = true; }
+  if (pw.length < 8) { showFieldErr('reg-pw-err',  'reg-password');  bad = true; }
+  if (pw !== pw2)    { showFieldErr('reg-pw2-err', 'reg-password2'); bad = true; }
   if (!terms) { showFieldErr('reg-terms-err', null); bad = true; }
   if (bad) { showAlert('reg-err-msg', 'Please fix the errors above.'); return; }
 
@@ -146,7 +152,7 @@ async function doRegister() {
     var res = await fetch(USER_API + '/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: fname + ' ' + lname, email, password: pw, role: document.getElementById('reg-role').value, phone, dateOfBirth: dob })
+      body: JSON.stringify({ name: fname + ' ' + lname, email, password: pw, role: document.getElementById('reg-role').value, phone, dateOfBirth: dob, address: city })
     });
     var data = await res.json();
     if (!res.ok) { showAlert('reg-err-msg', data.message || 'Registration failed.'); return; }
@@ -222,6 +228,7 @@ async function loadProfile() {
     var u = data.user || data;
 
     document.getElementById('nav-username').textContent    = u.name;
+    document.getElementById('nav-avatar-sm').textContent   = getInitials(u.name);
     document.getElementById('profile-avatar').textContent  = getInitials(u.name);
     document.getElementById('profile-name').textContent    = u.name;
     document.getElementById('profile-email').textContent   = u.email;
@@ -674,3 +681,98 @@ async function submitRenewal() {
     btn.innerHTML = '<i class="fas fa-sync-alt"></i>&nbsp; Confirm Renewal';
   }
 }
+
+// — Classes page —
+
+var classesLoaded = false;
+
+async function loadClasses() {
+  if (classesLoaded) return;
+  var grid = document.getElementById('classes-grid');
+  try {
+    var res  = await fetch('http://localhost:5000/api/classes');
+    var data = await res.json();
+    var list = data.classes || [];
+    if (!list.length) {
+      grid.innerHTML = '<div class="plans-loading">No classes available at the moment.</div>';
+      return;
+    }
+    grid.innerHTML = '';
+    list.forEach(function(c) {
+      var date = new Date(c.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      var card = document.createElement('div');
+      card.className = 'feat-card';
+      card.innerHTML =
+        '<div class="feat-icon"><i class="fas fa-calendar-check"></i></div>' +
+        '<h3>' + esc(c.name) + '</h3>' +
+        '<p>' + esc(c.category || 'General') + ' &mdash; ' + esc(c.instructor) + '</p>' +
+        '<p style="margin-top:8px;font-size:0.8rem;color:rgba(255,255,255,0.45)">' +
+          '<i class="fas fa-clock" style="margin-right:5px;color:var(--orange)"></i>' + esc(c.startTime) + ' &ndash; ' + esc(c.endTime) +
+          '&ensp;<i class="fas fa-calendar" style="margin-right:5px;color:var(--orange)"></i>' + date +
+          '&ensp;<i class="fas fa-users" style="margin-right:5px;color:var(--orange)"></i>' + (c.registeredMembers ? c.registeredMembers.length : 0) + ' / ' + c.capacity +
+        '</p>';
+      grid.appendChild(card);
+    });
+    classesLoaded = true;
+  } catch(e) {
+    grid.innerHTML = '<div class="plans-error"><i class="fas fa-exclamation-triangle"></i> Could not load classes. Please ensure the server is running.</div>';
+  }
+}
+
+// — Trainer Assignment (merged from assign_trainer) —
+
+var totalHours = 0;
+
+function clearTrainerForm() {
+  document.getElementById('trainerName').value  = '';
+  document.getElementById('classType').value    = '';
+  document.getElementById('sessionDate').value  = '';
+  document.getElementById('sessionHours').value = '';
+  document.getElementById('notes').value        = '';
+}
+
+function createAssignmentRow(data) {
+  var tbody = document.getElementById('assignmentBody');
+  var row   = document.createElement('tr');
+  row.innerHTML =
+    '<td>' + data.trainerName  + '</td>' +
+    '<td>' + data.classType    + '</td>' +
+    '<td>' + data.sessionDate  + '</td>' +
+    '<td>' + data.sessionHours + '</td>' +
+    '<td>' + data.notes        + '</td>' +
+    '<td><button class="delete-btn" type="button">Delete</button></td>';
+
+  row.querySelector('.delete-btn').addEventListener('click', function() {
+    row.remove();
+    totalHours -= Number(data.sessionHours);
+    document.getElementById('totalHours').textContent = totalHours;
+  });
+
+  tbody.appendChild(row);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var assignBtn = document.getElementById('assignButton');
+  var resetBtn  = document.getElementById('resetButton');
+  if (!assignBtn) return;
+
+  assignBtn.addEventListener('click', function() {
+    var trainerName  = document.getElementById('trainerName').value.trim();
+    var classType    = document.getElementById('classType').value;
+    var sessionDate  = document.getElementById('sessionDate').value;
+    var sessionHours = document.getElementById('sessionHours').value;
+    var notes        = document.getElementById('notes').value.trim() || '—';
+
+    if (!trainerName || !classType || !sessionDate || !sessionHours) {
+      alert('Please complete all required fields.');
+      return;
+    }
+
+    createAssignmentRow({ trainerName, classType, sessionDate, sessionHours, notes });
+    totalHours += Number(sessionHours);
+    document.getElementById('totalHours').textContent = totalHours;
+    clearTrainerForm();
+  });
+
+  resetBtn.addEventListener('click', clearTrainerForm);
+});

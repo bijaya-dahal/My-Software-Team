@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
-// ✅ FIXED PATH (important)
 const connectDB = require("./database/db");
 
 const app = express();
