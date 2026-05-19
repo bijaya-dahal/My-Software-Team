@@ -1,8 +1,6 @@
 const MembershipPlan = require("../models/MembershipPlan");
 const Subscription = require("../models/Subscription");
 
-// @route  POST /api/memberships/plans
-// @access Private - Staff/Admin only
 const createPlan = async(req, res) => {
     try {
         const { name, price, duration, description, features } = req.body;
@@ -31,8 +29,6 @@ const createPlan = async(req, res) => {
     }
 };
 
-// @route  GET /api/memberships/plans
-// @access Public
 const getAllPlans = async(req, res) => {
     try {
         const plans = await MembershipPlan.find({ isActive: true });
@@ -43,8 +39,6 @@ const getAllPlans = async(req, res) => {
     }
 };
 
-// @route  POST /api/memberships/subscribe
-// @access Private - Member
 const subscribeToPlan = async(req, res) => {
     try {
         const { planId, paymentMethod } = req.body;
@@ -91,8 +85,6 @@ const subscribeToPlan = async(req, res) => {
     }
 };
 
-// @route  GET /api/memberships/my-subscription
-// @access Private - Member
 const getMySubscription = async(req, res) => {
     try {
         const subscription = await Subscription.findOne({
@@ -111,8 +103,72 @@ const getMySubscription = async(req, res) => {
     }
 };
 
-// @route  GET /api/memberships/all-subscriptions
-// @access Private - Staff/Admin only
+const renewSubscription = async(req, res) => {
+    try {
+        const { planId, paymentMethod, subscriptionId } = req.body;
+
+        const planToUse = planId ? await MembershipPlan.findById(planId) : null;
+
+        let sub = subscriptionId ? await Subscription.findById(subscriptionId) : null;
+        if (!sub) {
+            sub = await Subscription.findOne({ member: req.user.id, status: "active" });
+        }
+
+        const plan = planToUse || (sub ? await MembershipPlan.findById(sub.plan) : null);
+        if (!plan) {
+            return res.status(404).json({ message: "Plan not found" });
+        }
+
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + plan.duration);
+
+        if (sub) {
+            sub.status = "expired";
+            await sub.save();
+        }
+
+        const newSub = await Subscription.create({
+            member: req.user.id,
+            plan: plan._id,
+            startDate,
+            endDate,
+            amountPaid: plan.price,
+            paymentMethod: paymentMethod || "cash",
+        });
+
+        const populated = await newSub.populate("plan");
+
+        res.status(201).json({ message: "Membership renewed successfully", subscription: populated });
+    } catch (error) {
+        console.error("Renew error:", error.message);
+        res.status(500).json({ message: "Server error renewing subscription" });
+    }
+};
+
+const getPaymentHistory = async(req, res) => {
+    try {
+        const payments = await Subscription.find({ member: req.user.id })
+            .populate("plan", "name price duration")
+            .sort({ createdAt: -1 });
+
+        const history = payments.map((s) => ({
+            _id: s._id,
+            plan: s.plan,
+            amount: s.amountPaid,
+            paymentMethod: s.paymentMethod,
+            status: s.status,
+            startDate: s.startDate,
+            date: s.createdAt,
+        }));
+
+        res.status(200).json({ payments: history });
+    } catch (error) {
+        console.error("Payment history error:", error.message);
+        res.status(500).json({ message: "Server error fetching payment history" });
+    }
+};
+
 const getAllSubscriptions = async(req, res) => {
     try {
         const subscriptions = await Subscription.find()
@@ -131,5 +187,7 @@ module.exports = {
     getAllPlans,
     subscribeToPlan,
     getMySubscription,
+    renewSubscription,
+    getPaymentHistory,
     getAllSubscriptions,
 };

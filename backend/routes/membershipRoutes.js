@@ -6,6 +6,8 @@ const {
     getAllPlans,
     subscribeToPlan,
     getMySubscription,
+    renewSubscription,
+    getPaymentHistory,
     getAllSubscriptions,
 } = require("../controllers/membershipController");
 
@@ -16,7 +18,9 @@ router.get("/plans", getAllPlans);
 
 // Private - Member
 router.post("/subscribe", protect, subscribeToPlan);
+router.post("/renew", protect, renewSubscription);
 router.get("/my-subscription", protect, getMySubscription);
+router.get("/payment-history", protect, getPaymentHistory);
 
 // Private - Staff/Admin only
 router.post("/plans", protect, authorise("staff", "admin"), createPlan);

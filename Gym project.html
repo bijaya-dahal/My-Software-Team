@@ -42,10 +42,12 @@
 <nav class="profile-nav hidden" id="profile-nav">
   <a href="#" class="logo" onclick="showPage('profile'); return false;">EVEREST FITNESS</a>
   <div class="profile-nav-right">
-    <span id="nav-username"></span>
     <button type="button" class="profile-nav-link profile-nav-btn" onclick="showPage('plans')">Membership</button>
-    <a href="assign.html" class="profile-nav-link">Classes</a>
-    <button type="button" onclick="logout()">Logout</button>
+    <button type="button" class="profile-nav-link profile-nav-btn" onclick="showPage('classes')">Classes</button>
+    <button type="button" class="profile-nav-link profile-nav-btn" onclick="showPage('trainer')">Trainer</button>
+    <span class="nav-avatar-sm" id="nav-avatar-sm">--</span>
+    <span id="nav-username"></span>
+    <button type="button" class="profile-nav-link profile-nav-btn" onclick="logout()">Logout</button>
   </div>
 </nav>
 
@@ -590,6 +592,88 @@
 
 </div>
 
+<!-- classes page -->
+<div id="page-classes" class="hidden">
+  <section class="section dark-bg">
+    <div class="sec-header">
+      <span class="eyebrow">Schedule</span>
+      <h2>GYM <span>CLASSES</span></h2>
+      <p>Browse and register for available classes at Everest Fitness.</p>
+    </div>
+    <div class="classes-grid" id="classes-grid">
+      <div class="plans-loading"><i class="fas fa-spinner fa-spin"></i> Loading classes&hellip;</div>
+    </div>
+  </section>
+</div>
+
+<!-- trainer page -->
+<div id="page-trainer" class="hidden">
+  <section class="section dark-bg">
+    <div class="sec-header">
+      <span class="eyebrow">Staff Management</span>
+      <h2>ASSIGN <span>TRAINER</span></h2>
+      <p>Add trainer assignments for gym classes and track total session hours.</p>
+    </div>
+    <div class="trainer-wrap">
+      <div class="trainer-form-grid">
+        <div class="form-group">
+          <label for="trainerName">Trainer Name</label>
+          <input type="text" id="trainerName" placeholder="e.g. Rajesh Sharma">
+        </div>
+        <div class="form-group">
+          <label for="classType">Class Type</label>
+          <select id="classType">
+            <option value="">Select class</option>
+            <option>Yoga</option>
+            <option>Zumba</option>
+            <option>Cardio</option>
+            <option>Strength Training</option>
+            <option>CrossFit</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sessionDate">Session Date</label>
+          <input type="date" id="sessionDate">
+        </div>
+        <div class="form-group">
+          <label for="sessionHours">Hours</label>
+          <input type="number" id="sessionHours" min="1" placeholder="Enter hours">
+        </div>
+        <div class="form-group trainer-notes">
+          <label for="notes">Notes</label>
+          <textarea id="notes" placeholder="Special instructions or class notes"></textarea>
+        </div>
+      </div>
+      <div class="trainer-btn-group">
+        <button type="button" id="assignButton" class="btn-primary">Assign Trainer</button>
+        <button type="button" id="resetButton" class="btn-outline">Clear</button>
+      </div>
+      <div class="trainer-table-wrap">
+        <h3>Trainer Assignments</h3>
+        <div class="trainer-table-scroll">
+          <table class="trainer-table">
+            <thead>
+              <tr>
+                <th>Trainer</th>
+                <th>Class</th>
+                <th>Date</th>
+                <th>Hours</th>
+                <th>Notes</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="assignmentBody"></tbody>
+          </table>
+        </div>
+        <div class="trainer-summary">
+          <span>Total Trainer Hours</span>
+          <strong id="totalHours">0</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
 <!-- auth modal -->
 <div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
   <div class="modal-box">
@@ -679,6 +763,11 @@
           <button type="button" class="pw-toggle" onclick="togglePw('reg-password2', this)">Show</button>
         </div>
         <div class="field-error" id="reg-pw2-err">Passwords do not match.</div>
+      </div>
+      <div class="form-group">
+        <label for="reg-city">City</label>
+        <input type="text" id="reg-city" placeholder="e.g. Kathmandu, Pokhara, Lalitpur...">
+        <div class="field-error" id="reg-city-err">City is required.</div>
       </div>
       <div class="form-group">
         <div class="terms-row">
