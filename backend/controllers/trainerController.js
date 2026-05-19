@@ -164,6 +164,20 @@ const getAllTrainers = async(req, res) => {
     }
 };
 
+// @route  GET /api/trainers/list
+// @access Private - Any logged-in user (member, trainer, staff, admin)
+const getTrainerList = async(req, res) => {
+    try {
+        const trainers = await User.find({ role: "trainer", isActive: true }).select(
+            "name phone createdAt"
+        );
+        res.status(200).json({ trainers });
+    } catch (error) {
+        console.error("Get trainer list error:", error.message);
+        res.status(500).json({ message: "Server error fetching trainers" });
+    }
+};
+
 // @route  DELETE /api/trainers/assignments/:id
 // @access Private - Staff/Admin only
 const cancelAssignment = async(req, res) => {
@@ -190,5 +204,6 @@ module.exports = {
     updateHoursWorked,
     getTrainerHours,
     getAllTrainers,
+    getTrainerList,
     cancelAssignment,
 };

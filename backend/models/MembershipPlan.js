@@ -4,7 +4,7 @@ const membershipPlanSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, "Plan name is required"],
-        enum: ["Basic", "Premium", "VIP"],
+        enum: ["Basic", "Premium", "Elite"],
         unique: true,
     },
     price: {

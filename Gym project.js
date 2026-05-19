@@ -1,29 +1,41 @@
-const USER_API = 'http://localhost:5000/api/users';
+const USER_API      = 'http://localhost:5000/api/users';
 const MEMBERSHIP_API = 'http://localhost:5000/api/memberships';
+const TRAINER_API    = 'http://localhost:5000/api/trainers';
 
 // Get token from local storage
 function getToken() {
   return localStorage.getItem('ef_token');
 }
 
-let plansLoaded = false;
+let plansLoaded    = false;
+let trainersLoaded = false;
 
 // Show the right page section
 function showPage(page) {
-  document.getElementById('page-landing').classList.toggle('hidden', page !== 'landing');
-  document.getElementById('page-profile').classList.toggle('hidden', page !== 'profile');
-  document.getElementById('page-plans').classList.toggle('hidden',   page !== 'plans');
-  document.getElementById('main-nav').classList.toggle('hidden',     page !== 'landing');
-  document.getElementById('profile-nav').classList.toggle('hidden',  page === 'landing');
+  document.getElementById('page-landing').classList.toggle('hidden',  page !== 'landing');
+  document.getElementById('page-profile').classList.toggle('hidden',  page !== 'profile');
+  document.getElementById('page-plans').classList.toggle('hidden',    page !== 'plans');
+  document.getElementById('page-trainers').classList.toggle('hidden', page !== 'trainers');
+  document.getElementById('main-nav').classList.toggle('hidden',      page !== 'landing');
+  document.getElementById('profile-nav').classList.toggle('hidden',   page === 'landing');
   window.scrollTo(0, 0);
-  // Only load plans once
+
   if (page === 'plans' && !plansLoaded) {
     plansLoaded = true;
     loadPlans();
     checkActiveSubscription();
-
     initBillingSection();
     loadPaymentHistory();
+  }
+
+  if (page === 'trainers' && !trainersLoaded) {
+    trainersLoaded = true;
+    loadTrainers();
+    var user = getUser();
+    if (user.role === 'trainer') {
+      document.getElementById('my-assignments-section').classList.remove('hidden');
+      loadMyAssignments();
+    }
   }
 }
 
@@ -125,8 +137,9 @@ async function doRegister() {
   var lname = document.getElementById('reg-lname').value.trim();
   var email = document.getElementById('reg-email').value.trim().toLowerCase();
   var phone = document.getElementById('reg-phone').value.trim();
-  var dob   = document.getElementById('reg-dob').value;
-  var pw    = document.getElementById('reg-password').value;
+  var dob     = document.getElementById('reg-dob').value;
+  var address = document.getElementById('reg-address').value.trim();
+  var pw      = document.getElementById('reg-password').value;
   var pw2   = document.getElementById('reg-password2').value;
   var terms = document.getElementById('reg-terms').checked;
 
@@ -146,7 +159,7 @@ async function doRegister() {
     var res = await fetch(USER_API + '/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: fname + ' ' + lname, email, password: pw, role: document.getElementById('reg-role').value, phone, dateOfBirth: dob })
+      body: JSON.stringify({ name: fname + ' ' + lname, email, password: pw, role: document.getElementById('reg-role').value, phone, dateOfBirth: dob, address })
     });
     var data = await res.json();
     if (!res.ok) { showAlert('reg-err-msg', data.message || 'Registration failed.'); return; }
@@ -196,8 +209,36 @@ async function doLogin() {
 function logout() {
   localStorage.removeItem('ef_token');
   localStorage.removeItem('ef_user');
+  plansLoaded    = false;
+  trainersLoaded = false;
+  closeNavDropdown();
   showPage('landing');
 }
+
+function toggleNavDropdown() {
+  var dropdown = document.getElementById('nav-dropdown');
+  var chevron  = document.getElementById('nav-chevron');
+  var isOpen   = !dropdown.classList.contains('hidden');
+  if (isOpen) {
+    dropdown.classList.add('hidden');
+    chevron.classList.remove('nd-open');
+  } else {
+    dropdown.classList.remove('hidden');
+    chevron.classList.add('nd-open');
+  }
+}
+
+function closeNavDropdown() {
+  var dropdown = document.getElementById('nav-dropdown');
+  var chevron  = document.getElementById('nav-chevron');
+  if (dropdown) { dropdown.classList.add('hidden'); }
+  if (chevron)  { chevron.classList.remove('nd-open'); }
+}
+
+document.addEventListener('click', function(e) {
+  var btn = document.getElementById('nav-profile-btn');
+  if (btn && !btn.contains(e.target)) closeNavDropdown();
+});
 
 function getInitials(name) {
   var parts = name.trim().split(' ');
@@ -221,11 +262,20 @@ async function loadProfile() {
     var data = await res.json();
     var u = data.user || data;
 
-    document.getElementById('nav-username').textContent    = u.name;
-    document.getElementById('profile-avatar').textContent  = getInitials(u.name);
+    var initials  = getInitials(u.name);
+    var roleLabel = u.role ? (u.role[0].toUpperCase() + u.role.slice(1)) : 'Member';
+
+    // nav avatar dropdown
+    document.getElementById('nav-avatar-sm').textContent    = initials;
+    document.getElementById('nav-username').textContent     = u.name.split(' ')[0];
+    document.getElementById('nav-dropdown-name').textContent = u.name;
+    document.getElementById('nav-dropdown-role').textContent = roleLabel;
+
+    // profile page
+    document.getElementById('profile-avatar').textContent  = initials;
     document.getElementById('profile-name').textContent    = u.name;
     document.getElementById('profile-email').textContent   = u.email;
-    document.getElementById('profile-role').textContent    = u.role ? (u.role[0].toUpperCase() + u.role.slice(1)) : 'Member';
+    document.getElementById('profile-role').textContent    = roleLabel;
 
     document.getElementById('view-name').textContent    = u.name    || '-';
     document.getElementById('view-email').textContent   = u.email   || '-';
@@ -673,4 +723,106 @@ async function submitRenewal() {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-sync-alt"></i>&nbsp; Confirm Renewal';
   }
+}
+
+// ── Trainers ─────────────────────────────────────────────────────────────────
+
+async function loadTrainers() {
+  var grid = document.getElementById('trainers-grid');
+  try {
+    var res  = await fetch(TRAINER_API + '/list', {
+      headers: { 'Authorization': 'Bearer ' + getToken() }
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Server error');
+    renderTrainers(data.trainers || []);
+  } catch(e) {
+    grid.innerHTML =
+      '<div class="trainers-empty">' +
+      '<i class="fas fa-users-slash"></i>' +
+      '<p>Could not load trainers. Please ensure the backend is running.</p>' +
+      '</div>';
+  }
+}
+
+function trainerInitials(name) {
+  var parts = (name || '').trim().split(' ');
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return (name || '--').substring(0, 2).toUpperCase();
+}
+
+function renderTrainers(trainers) {
+  var grid = document.getElementById('trainers-grid');
+  if (!trainers.length) {
+    grid.innerHTML =
+      '<div class="trainers-empty">' +
+      '<i class="fas fa-user-plus"></i>' +
+      '<p>No trainers registered yet. Trainers will appear here once added by staff.</p>' +
+      '</div>';
+    return;
+  }
+  grid.innerHTML = '';
+  trainers.forEach(function(t) {
+    var card = document.createElement('div');
+    card.className = 'trainer-card';
+    card.innerHTML =
+      '<div class="trainer-avatar">' + esc(trainerInitials(t.name)) + '</div>' +
+      '<div class="trainer-info">' +
+        '<h3 class="trainer-name">' + esc(t.name) + '</h3>' +
+        '<span class="trainer-badge"><i class="fas fa-certificate"></i> Certified Trainer</span>' +
+        (t.phone
+          ? '<div class="trainer-contact"><i class="fas fa-phone"></i> ' + esc(t.phone) + '</div>'
+          : '<div class="trainer-contact trainer-contact-na"><i class="fas fa-phone"></i> Contact via reception</div>') +
+        '<div class="trainer-contact"><i class="fas fa-map-marker-alt"></i> Everest Fitness, Nepal</div>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+async function loadMyAssignments() {
+  var list = document.getElementById('assignments-list');
+  try {
+    var res  = await fetch(TRAINER_API + '/my-assignments', {
+      headers: { 'Authorization': 'Bearer ' + getToken() }
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Server error');
+    renderAssignments(data.assignments || []);
+  } catch(e) {
+    list.innerHTML =
+      '<div class="trainers-empty"><i class="fas fa-calendar-times"></i><p>Could not load your schedule.</p></div>';
+  }
+}
+
+function renderAssignments(assignments) {
+  var list = document.getElementById('assignments-list');
+  if (!assignments.length) {
+    list.innerHTML =
+      '<div class="trainers-empty">' +
+      '<i class="fas fa-calendar-check"></i>' +
+      '<p>No assignments yet. Your class schedule will appear here once staff assigns you.</p>' +
+      '</div>';
+    return;
+  }
+  var html = '<div class="assignments-table-wrap"><table class="assignments-table">' +
+    '<thead><tr><th>Class</th><th>Date</th><th>Time</th><th>Location</th><th>Status</th></tr></thead><tbody>';
+
+  assignments.forEach(function(a) {
+    var cls     = a.class || {};
+    var date    = cls.date ? new Date(cls.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    var time    = cls.startTime && cls.endTime ? cls.startTime + ' – ' + cls.endTime : '—';
+    var status  = (a.status || 'assigned').toLowerCase();
+    var badgeClass = status === 'completed' ? 'status-badge paid' : status === 'cancelled' ? 'status-badge failed' : 'status-badge active';
+    html +=
+      '<tr>' +
+      '<td>' + esc(cls.name || '—') + '</td>' +
+      '<td>' + date + '</td>' +
+      '<td>' + esc(time) + '</td>' +
+      '<td>' + esc(cls.location || 'TBC') + '</td>' +
+      '<td><span class="' + badgeClass + '">' + esc(status) + '</span></td>' +
+      '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  list.innerHTML = html;
 }

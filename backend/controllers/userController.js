@@ -1,14 +1,13 @@
+const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
-const jwt = require("jsonwebtoken");
 
 const generateToken = (id, role) => {
-    return jwt.sign({ id, role }, process.env.JWT_SECRET, {
+    return jwt.sign({ id, role }, process.env.JWT_SECRET || "gym-secret-key", {
         expiresIn: "7d",
     });
 };
 
 const registerUser = async(req, res) => {
-    console.log("Register hit!", req.body);
     try {
         const { name, email, password, role, phone, dateOfBirth, address } = req.body;
 
@@ -16,19 +15,15 @@ const registerUser = async(req, res) => {
             return res.status(400).json({ message: "Name, email and password are required" });
         }
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
+        const existing = await User.findOne({ email });
+        if (existing) {
             return res.status(400).json({ message: "A user with this email already exists" });
         }
 
         const user = await User.create({
-            name,
-            email,
-            password,
+            name, email, password,
             role: role || "member",
-            phone,
-            dateOfBirth,
-            address,
+            phone, dateOfBirth, address
         });
 
         res.status(201).json({
@@ -79,6 +74,8 @@ const loginUser = async(req, res) => {
                 email: user.email,
                 role: user.role,
                 phone: user.phone,
+                dateOfBirth: user.dateOfBirth,
+                address: user.address,
             },
             token: generateToken(user._id, user.role),
         });
@@ -103,31 +100,30 @@ const getUserProfile = async(req, res) => {
 
 const updateUserProfile = async(req, res) => {
     try {
-        const { name, phone, dateOfBirth, address } = req.body;
-
         const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        if (name) user.name = name;
-        if (phone) user.phone = phone;
+        const { name, phone, dateOfBirth, address } = req.body;
+        if (name)        user.name        = name;
+        if (phone)       user.phone       = phone;
         if (dateOfBirth) user.dateOfBirth = dateOfBirth;
-        if (address) user.address = address;
+        if (address)     user.address     = address;
 
-        const updatedUser = await user.save();
-
-        res.status(200).json({
-            message: "Profile updated successfully",
+        const updated = await user.save();
+        res.json({
+            message: "Profile updated",
             user: {
-                id: updatedUser._id,
-                name: updatedUser.name,
-                email: updatedUser.email,
-                role: updatedUser.role,
-                phone: updatedUser.phone,
-                dateOfBirth: updatedUser.dateOfBirth,
-                address: updatedUser.address,
-            },
+                id: updated._id,
+                name: updated.name,
+                email: updated.email,
+                role: updated.role,
+                phone: updated.phone,
+                dateOfBirth: updated.dateOfBirth,
+                address: updated.address,
+                createdAt: updated.createdAt,
+            }
         });
     } catch (error) {
         console.error("Update profile error:", error);
@@ -135,4 +131,9 @@ const updateUserProfile = async(req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile };
+module.exports = {
+    registerUser,
+    loginUser,
+    getUserProfile,
+    updateUserProfile,
+};

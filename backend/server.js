@@ -1,43 +1,41 @@
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
+const cors    = require("cors");
 
-// ✅ FIXED PATH (important)
-const connectDB = require("./database/db");
+const connectDB          = require("./database/db");
+const userRoutes         = require("./routes/userRoutes");
+const membershipRoutes   = require("./routes/membershipRoutes");
+const classRoutes        = require("./routes/classRoutes");
+const trainerRoutes      = require("./routes/trainerRoutes");
+const { seedDefaultPlans } = require("./controllers/membershipController");
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to MongoDB and start server
-const startServer = async() => {
-    await connectDB();
+app.use("/api/users",       userRoutes);
+app.use("/api/memberships", membershipRoutes);
+app.use("/api/classes",     classRoutes);
+app.use("/api/trainers",    trainerRoutes);
+
+app.get("/", (req, res) => {
+    res.json({ message: "GymApp API is running" });
+});
+
+const startServer = async () => {
+    const connected = await connectDB();
+    if (connected) {
+        await seedDefaultPlans();
+    } else {
+        console.warn("⚠  Running without database — register/login will not work until MongoDB is started.");
+    }
 
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 };
-
-// Routes
-const userRoutes = require("./routes/userRoutes");
-app.use("/api/users", userRoutes);
-
-const membershipRoutes = require("./routes/membershipRoutes");
-app.use("/api/memberships", membershipRoutes);
-
-const classRoutes = require("./routes/classRoutes");
-app.use("/api/classes", classRoutes);
-
-const trainerRoutes = require("./routes/trainerRoutes");
-app.use("/api/trainers", trainerRoutes);
-
-// Health check route
-app.get("/", (req, res) => {
-    res.json({ message: "GymApp API is running" });
-});
 
 startServer();

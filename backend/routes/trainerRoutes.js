@@ -8,6 +8,7 @@ const {
     updateHoursWorked,
     getTrainerHours,
     getAllTrainers,
+    getTrainerList,
     cancelAssignment,
 } = require("../controllers/trainerController");
 
@@ -20,6 +21,9 @@ router.get("/assignments", protect, authorise("staff", "admin"), getAllAssignmen
 router.get("/hours", protect, authorise("staff", "admin"), getTrainerHours);
 router.put("/assignments/:id/hours", protect, authorise("staff", "admin"), updateHoursWorked);
 router.delete("/assignments/:id", protect, authorise("staff", "admin"), cancelAssignment);
+
+// Private - Any logged-in user
+router.get("/list", protect, getTrainerList);
 
 // Private - Trainer only
 router.get("/my-assignments", protect, authorise("trainer"), getMyAssignments);

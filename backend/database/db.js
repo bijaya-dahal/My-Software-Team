@@ -1,15 +1,17 @@
 const mongoose = require("mongoose");
 
-const connectDB = async() => {
+const connectDB = async () => {
     try {
         const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/gymDB";
         const conn = await mongoose.connect(uri, {
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 3000,
         });
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        console.log(`✓ MongoDB Connected: ${conn.connection.host}`);
+        return true;
     } catch (error) {
-        console.error("MongoDB connection error:", error.message);
-        process.exit(1);
+        console.error(`✗ MongoDB connection failed: ${error.message}`);
+        console.error("  Make sure MongoDB is running: net start MongoDB");
+        return false;
     }
 };
 
