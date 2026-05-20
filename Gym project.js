@@ -1,6 +1,34 @@
 const USER_API = 'http://localhost:5000/api/users';
 const MEMBERSHIP_API = 'http://localhost:5000/api/memberships';
 
+// Single source of truth for plan prices — used by BOTH landing page and logged-in plans page
+var FALLBACK_PLANS = [
+  {
+    _id: 'basic',
+    name: 'Basic',
+    price: 12.99,
+    duration: 30,
+    features: ['Gym floor access', '2 group classes/month', 'Member dashboard'],
+    excluded: ['Personal trainer', 'Priority booking']
+  },
+  {
+    _id: 'premium',
+    name: 'Premium',
+    price: 24.99,
+    duration: 30,
+    features: ['Gym floor access', 'Unlimited group classes', 'Member dashboard', '2 PT sessions/month'],
+    excluded: ['Priority booking']
+  },
+  {
+    _id: 'elite',
+    name: 'Elite',
+    price: 49.99,
+    duration: 30,
+    features: ['Gym floor access', 'Unlimited group classes', 'Member dashboard', 'Unlimited PT sessions', 'Priority booking'],
+    excluded: []
+  }
+];
+
 
 // Get token from local storage
 function getToken() {
@@ -90,7 +118,7 @@ function clearErrors(sectionId) {
   section.querySelectorAll('.field-error').forEach(function (el) {
     el.classList.remove('show');
   });
-  section.querySelectorAll('input').forEach(function (el) {
+  section.querySelectorAll('input, select').forEach(function (el) {
     el.classList.remove('error');
   });
 }
@@ -309,13 +337,6 @@ async function saveProfile() {
     localStorage.setItem('ef_user', JSON.stringify(stored));
 
     await loadProfile();
-
-    // Force role badge to the selected value — backend may not persist role changes
-    if (role) {
-      var roleLabel = role[0].toUpperCase() + role.slice(1);
-      document.getElementById('profile-role').textContent = roleLabel;
-    }
-
     cancelEdit();
     showAlert('success-msg', 'Profile updated successfully!');
     setTimeout(function () { hideAlert('success-msg'); }, 4000);
@@ -341,6 +362,7 @@ if (getToken()) {
   loadProfile();
 } else {
   showPage('landing');
+  loadLandingPlans();
 }
 
 var currentPlanId  = '';
@@ -372,6 +394,52 @@ function clearBillingErrors() {
   document.querySelectorAll('#page-plans input, #page-plans select').forEach(function(el) { el.classList.remove('error'); });
 }
 
+async function loadLandingPlans() {
+  try {
+    var res  = await fetch(MEMBERSHIP_API + '/plans');
+    var data = await res.json();
+    if (!res.ok) throw new Error();
+    var apiPlans = data.plans || [];
+    // Match by position — API plan 0 = Basic, 1 = Premium, 2 = Elite
+    var merged = FALLBACK_PLANS.map(function(fallback, i) {
+      return {
+        _id:      apiPlans[i] ? apiPlans[i]._id : fallback._id,
+        name:     fallback.name,
+        price:    fallback.price,
+        duration: fallback.duration,
+        features: fallback.features,
+        excluded: fallback.excluded
+      };
+    });
+    renderLandingPlans(merged);
+  } catch(e) {
+    renderLandingPlans(FALLBACK_PLANS);
+  }
+}
+
+function renderLandingPlans(plans) {
+  var grid = document.getElementById('landing-plans-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  plans.forEach(function(plan) {
+    var featHtml = (plan.features || []).map(function(f) {
+      return '<li><i class="fas fa-check-circle"></i> ' + esc(f) + '</li>';
+    }).join('');
+    var exclHtml = (plan.excluded || []).map(function(f) {
+      return '<li class="off"><i class="fas fa-times-circle"></i> ' + esc(f) + '</li>';
+    }).join('');
+    var card = document.createElement('div');
+    card.className = 'plan-card';
+    card.innerHTML =
+      '<div class="plan-name">' + esc(plan.name) + '</div>' +
+      '<div class="plan-price"><sup>£</sup>' + Number(plan.price).toFixed(2) + '<sub>/mo</sub></div>' +
+      '<hr>' +
+      '<ul class="plan-features">' + featHtml + exclHtml + '</ul>' +
+      '<button type="button" class="btn-plan btn-plan-outline" onclick="openModal(\'register\')">Get Started</button>';
+    grid.appendChild(card);
+  });
+}
+
 async function loadPlans() {
   var grid = document.getElementById('plans-grid');
   grid.innerHTML = '<div class="plans-loading"><i class="fas fa-spinner fa-spin"></i> Loading plans&hellip;</div>';
@@ -379,11 +447,22 @@ async function loadPlans() {
     var res  = await fetch(MEMBERSHIP_API + '/plans');
     var data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Server error');
-    renderPlans(data.plans || []);
+    var apiPlans = data.plans || [];
+    // Match by position so names/prices always mirror the landing page
+    // Keep real MongoDB _id so payment submission still works
+    var merged = FALLBACK_PLANS.map(function(fallback, i) {
+      return {
+        _id:      apiPlans[i] ? apiPlans[i]._id : fallback._id,
+        name:     fallback.name,
+        price:    fallback.price,
+        duration: apiPlans[i] ? apiPlans[i].duration : fallback.duration,
+        features: fallback.features,
+        excluded: fallback.excluded
+      };
+    });
+    renderPlans(merged);
   } catch(e) {
-    grid.innerHTML =
-      '<div class="plans-error"><i class="fas fa-exclamation-triangle"></i> ' +
-      'Could not load plans. Please ensure the server is running.</div>';
+    renderPlans(FALLBACK_PLANS);
   }
 }
 
@@ -402,28 +481,28 @@ function renderPlans(plans) {
   renewDrop.innerHTML = '<option value="">&#8212; Same as current plan &#8212;</option>';
 
   plans.forEach(function(plan) {
-    var featHtml = '';
-    (plan.features || []).forEach(function(f) {
-      featHtml += '<li><i class="fas fa-check-circle"></i> ' + esc(f) + '</li>';
-    });
+    var featHtml = (plan.features || []).map(function(f) {
+      return '<li><i class="fas fa-check-circle"></i> ' + esc(f) + '</li>';
+    }).join('');
+    var exclHtml = (plan.excluded || []).map(function(f) {
+      return '<li class="off"><i class="fas fa-times-circle"></i> ' + esc(f) + '</li>';
+    }).join('');
 
     var card = document.createElement('div');
     card.className = 'plan-card';
     card.dataset.planId = plan._id;
     card.innerHTML =
       '<div class="plan-name">' + esc(plan.name) + '</div>' +
-      '<div class="plan-price"><sup>£</sup>' + plan.price.toLocaleString() + '<sub>/mo</sub></div>' +
-      '<div class="plan-duration"><i class="fas fa-calendar-alt"></i> ' + durationLabel(plan.duration) + '</div>' +
-      (plan.description ? '<div class="plan-description">' + esc(plan.description) + '</div>' : '') +
+      '<div class="plan-price"><sup>£</sup>' + Number(plan.price).toFixed(2) + '<sub>/mo</sub></div>' +
       '<hr>' +
-      (featHtml ? '<ul class="plan-features">' + featHtml + '</ul>' : '') +
+      '<ul class="plan-features">' + featHtml + exclHtml + '</ul>' +
       '<button type="button" class="btn-plan" ' +
         'onclick="selectPlan(\'' + plan._id + '\',\'' + esc(plan.name) + '\',' + plan.price + ',' + plan.duration + ')">' +
         'Get Started</button>';
     grid.appendChild(card);
 
     var optVal  = plan._id + '|' + plan.name + '|' + plan.price + '|' + plan.duration;
-    var optText = plan.name + ' — £' + plan.price.toLocaleString() + '/mo (' + durationLabel(plan.duration) + ')';
+    var optText = plan.name + ' — £' + Number(plan.price).toFixed(2) + '/mo (' + durationLabel(plan.duration) + ')';
 
     var opt = document.createElement('option');
     opt.value = optVal; opt.textContent = optText;

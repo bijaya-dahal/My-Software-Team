@@ -51,21 +51,6 @@ body {
 }
 .logo span { color: var(--orange); }
 
-.nav-links {
-  display: flex;
-  gap: 28px;
-  list-style: none;
-}
-.nav-links a {
-  color: rgba(255, 255, 255, 0.75);
-  text-decoration: none;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  transition: color 0.2s;
-}
-.nav-links a:hover { color: var(--orange); }
 
 .burger {
   background: none;
@@ -303,21 +288,6 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(249, 115, 22, 0.14);
-  border: 1px solid rgba(249, 115, 22, 0.4);
-  color: var(--orange);
-  padding: 6px 18px;
-  border-radius: 50px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  margin-bottom: 22px;
-}
 
 .hero-title {
   font-family: 'Barlow Condensed', Arial, sans-serif;
@@ -752,20 +722,6 @@ footer {
   max-width: 260px;
   margin-top: 8px;
 }
-.socials { display: flex; gap: 9px; margin-top: 18px; }
-.soc {
-  width: 34px; height: 34px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.82rem;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-.soc:hover { background: var(--orange); color: #fff; }
 
 .footer-col h4 {
   font-size: 0.72rem;
@@ -1184,19 +1140,6 @@ footer {
 .plans-loading i,
 .plans-error i { margin-right: 8px; }
 
-.plan-duration {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.35);
-  margin-top: 8px;
-}
-.plan-duration i { color: var(--orange); margin-right: 4px; font-size: 0.68rem; }
-.plan-description {
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.45);
-  margin-top: 10px;
-  line-height: 1.5;
-  padding: 0 4px;
-}
 
 .billing-section { background: #111827; }
 .history-section  { background: #0d1117; }
