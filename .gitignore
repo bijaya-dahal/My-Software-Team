@@ -7,4 +7,9 @@ backend/node_modules/
 
 # Mac system file
 .DS_Store
+
+# Large installer files
 *.msi
+
+# Stray git clones inside the project folder
+My-Software-Team.git/
