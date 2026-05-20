@@ -243,6 +243,7 @@ async function loadProfile() {
 
     document.getElementById('edit-name').value    = u.name    || '';
     document.getElementById('edit-email').value   = u.email   || '';
+    document.getElementById('edit-role').value    = u.role    || 'member';
     document.getElementById('edit-phone').value   = u.phone   || '';
     document.getElementById('edit-address').value = u.address || '';
     if (u.dateOfBirth) document.getElementById('edit-dob').value = u.dateOfBirth.split('T')[0];
@@ -271,6 +272,7 @@ async function saveProfile() {
   document.getElementById('edit-name-err').classList.remove('show');
 
   var name    = document.getElementById('edit-name').value.trim();
+  var role    = document.getElementById('edit-role').value;
   var phone   = document.getElementById('edit-phone').value.trim();
   var dob     = document.getElementById('edit-dob').value;
   var address = document.getElementById('edit-address').value.trim();
@@ -283,6 +285,7 @@ async function saveProfile() {
 
   try {
     var body = { name };
+    if (role)    body.role = role;
     if (phone)   body.phone = phone;
     if (dob)     body.dateOfBirth = dob;
     if (address) body.address = address;
@@ -300,6 +303,7 @@ async function saveProfile() {
 
     var stored = JSON.parse(localStorage.getItem('ef_user') || '{}');
     stored.name = name;
+    if (role) stored.role = role;
     localStorage.setItem('ef_user', JSON.stringify(stored));
 
     await loadProfile();
