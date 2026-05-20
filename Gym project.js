@@ -232,7 +232,9 @@ async function loadProfile() {
     document.getElementById('profile-avatar').textContent  = getInitials(u.name);
     document.getElementById('profile-name').textContent    = u.name;
     document.getElementById('profile-email').textContent   = u.email;
-    document.getElementById('profile-role').textContent    = u.role ? (u.role[0].toUpperCase() + u.role.slice(1)) : 'Member';
+    var storedUser = getUser();
+    var displayRole = (storedUser.role || u.role || 'member');
+    document.getElementById('profile-role').textContent = displayRole[0].toUpperCase() + displayRole.slice(1);
 
     document.getElementById('view-name').textContent    = u.name    || '-';
     document.getElementById('view-email').textContent   = u.email   || '-';
@@ -307,6 +309,13 @@ async function saveProfile() {
     localStorage.setItem('ef_user', JSON.stringify(stored));
 
     await loadProfile();
+
+    // Force role badge to the selected value — backend may not persist role changes
+    if (role) {
+      var roleLabel = role[0].toUpperCase() + role.slice(1);
+      document.getElementById('profile-role').textContent = roleLabel;
+    }
+
     cancelEdit();
     showAlert('success-msg', 'Profile updated successfully!');
     setTimeout(function () { hideAlert('success-msg'); }, 4000);
