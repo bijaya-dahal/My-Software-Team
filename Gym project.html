@@ -42,35 +42,34 @@
 <nav class="profile-nav hidden" id="profile-nav">
   <a href="#" class="logo" onclick="showPage('profile'); return false;">EVEREST FITNESS</a>
 
-  <!-- Profile dropdown (only item on the right) -->
-  <div class="nav-profile" id="nav-profile-btn" onclick="toggleNavDropdown()">
-    <div class="nav-avatar-sm" id="nav-avatar-sm">--</div>
-    <span id="nav-username">Loading&hellip;</span>
-    <i class="fas fa-chevron-down" id="nav-chevron"></i>
-    <div class="nav-dropdown hidden" id="nav-dropdown" onclick="event.stopPropagation()">
-      <div class="nav-dropdown-header">
-        <div class="nav-dropdown-name" id="nav-dropdown-name"></div>
-        <div class="nav-dropdown-role" id="nav-dropdown-role"></div>
-      </div>
-      <button type="button" onclick="showPage('profile'); closeNavDropdown()">
+  <div class="pnav-right">
+    <div class="pnav-links">
+      <button type="button" class="pnav-link" onclick="showPage('profile')">
         <i class="fas fa-user"></i> My Profile
       </button>
-      <button type="button" onclick="showPage('plans'); closeNavDropdown()">
+      <button type="button" class="pnav-link" onclick="showPage('plans')">
         <i class="fas fa-id-card"></i> Membership
       </button>
-      <button type="button" onclick="showPage('classes'); closeNavDropdown()">
+      <button type="button" class="pnav-link" onclick="showPage('classes')">
         <i class="fas fa-calendar-check"></i> Classes
       </button>
-      <button type="button" onclick="showPage('trainers'); closeNavDropdown()">
+      <button type="button" class="pnav-link" onclick="showPage('trainers')">
         <i class="fas fa-dumbbell"></i> Trainers
       </button>
-      <hr class="nav-dropdown-divider">
-      <button type="button" class="nav-logout-btn" onclick="logout()">
+    </div>
+
+    <div class="pnav-divider"></div>
+
+    <div class="pnav-user">
+      <div class="nav-avatar-sm" id="nav-avatar-sm">--</div>
+      <span id="nav-username">Loading&hellip;</span>
+      <span class="hidden" id="nav-dropdown-name"></span>
+      <span class="hidden" id="nav-dropdown-role"></span>
+      <button type="button" class="pnav-logout" onclick="logout()">
         <i class="fas fa-sign-out-alt"></i> Logout
       </button>
     </div>
   </div>
-
 </nav>
 
 <!-- landing page -->
@@ -597,19 +596,6 @@
 <!-- trainers page -->
 <div id="page-trainers" class="hidden">
 
-  <section class="section dark-bg">
-    <div class="sec-header">
-      <span class="eyebrow">Everest Fitness Team</span>
-      <h2>MEET OUR <span>TRAINERS</span></h2>
-      <p>Our certified professional trainers are here to guide your fitness journey in Nepal.</p>
-    </div>
-    <div class="trainers-grid" id="trainers-grid">
-      <div class="trainers-loading">
-        <i class="fas fa-spinner fa-spin"></i> Loading trainers&hellip;
-      </div>
-    </div>
-  </section>
-
   <!-- My Assignments — visible only to trainer role -->
   <section class="section hidden" id="my-assignments-section">
     <div class="sec-header">
@@ -621,6 +607,93 @@
       <div class="trainers-loading">
         <i class="fas fa-spinner fa-spin"></i> Loading your schedule&hellip;
       </div>
+    </div>
+  </section>
+
+  <!-- Assign Trainer — staff management -->
+  <section class="section dark-bg" id="assign-trainer-section">
+    <div class="sec-header">
+      <span class="eyebrow">Staff Management</span>
+      <h2>ASSIGN <span>TRAINER</span></h2>
+      <p>Add trainer assignments for gym classes and track total hours.</p>
+    </div>
+
+    <div class="at-wrap">
+
+      <div class="at-form-card">
+        <div class="at-form-grid">
+          <div class="form-group">
+            <label for="at-trainer-name">Trainer Name</label>
+            <input type="text" id="at-trainer-name" placeholder="e.g. Alex Carter">
+            <div class="field-error" id="at-trainer-name-err">Trainer name is required.</div>
+          </div>
+          <div class="form-group">
+            <label for="at-class-type">Class Type</label>
+            <select id="at-class-type">
+              <option value="">&mdash; Select class &mdash;</option>
+              <option value="Yoga">Yoga</option>
+              <option value="Zumba">Zumba</option>
+              <option value="Cardio">Cardio</option>
+              <option value="Strength Training">Strength Training</option>
+              <option value="CrossFit">CrossFit</option>
+              <option value="HIIT">HIIT</option>
+              <option value="Martial Arts">Martial Arts</option>
+            </select>
+            <div class="field-error" id="at-class-type-err">Class type is required.</div>
+          </div>
+          <div class="form-group">
+            <label for="at-session-date">Session Date</label>
+            <input type="date" id="at-session-date">
+            <div class="field-error" id="at-session-date-err">Session date is required.</div>
+          </div>
+          <div class="form-group">
+            <label for="at-hours">Hours</label>
+            <input type="number" id="at-hours" min="1" max="24" placeholder="e.g. 2">
+            <div class="field-error" id="at-hours-err">Hours are required.</div>
+          </div>
+          <div class="form-group at-full-width">
+            <label for="at-notes">Notes <span class="field-optional">(optional)</span></label>
+            <textarea id="at-notes" placeholder="Special instructions or class notes"></textarea>
+          </div>
+        </div>
+        <div class="at-btn-group">
+          <button type="button" class="btn-primary" onclick="assignTrainer()">
+            <i class="fas fa-user-plus"></i>&nbsp; Assign Trainer
+          </button>
+          <button type="button" class="btn-outline" onclick="clearAssignForm()">
+            <i class="fas fa-times"></i>&nbsp; Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="at-table-card">
+        <div class="at-table-header">
+          <h3>Trainer Assignments</h3>
+          <div class="at-summary">
+            Total Hours: <strong id="at-total-hours">0</strong>
+          </div>
+        </div>
+        <div class="at-table-scroll">
+          <table class="at-table">
+            <thead>
+              <tr>
+                <th>Trainer</th>
+                <th>Class</th>
+                <th>Date</th>
+                <th>Hours</th>
+                <th>Notes</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="at-body">
+              <tr class="at-empty-row">
+                <td colspan="6">No assignments yet. Use the form above to assign a trainer.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -701,7 +774,7 @@
         <div class="field-error" id="reg-dob-err">Date of birth is required.</div>
       </div>
       <div class="form-group">
-        <label for="reg-address">Address <span class="field-optional">(optional)</span></label>
+        <label for="reg-address">City / Address</label>
         <input type="text" id="reg-address" placeholder="e.g. Kathmandu, Thamel" list="nepal-cities" autocomplete="off">
         <datalist id="nepal-cities">
           <option value="Kathmandu">
@@ -735,11 +808,6 @@
           <button type="button" class="pw-toggle" onclick="togglePw('reg-password2', this)">Show</button>
         </div>
         <div class="field-error" id="reg-pw2-err">Passwords do not match.</div>
-      </div>
-      <div class="form-group">
-        <label for="reg-city">City</label>
-        <input type="text" id="reg-city" placeholder="e.g. Kathmandu, Pokhara, Lalitpur...">
-        <div class="field-error" id="reg-city-err">City is required.</div>
       </div>
       <div class="form-group">
         <div class="terms-row">

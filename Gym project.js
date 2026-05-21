@@ -47,7 +47,14 @@ function showPage(page) {
   document.getElementById('page-classes').classList.toggle('hidden',  page !== 'classes');
   document.getElementById('page-trainers').classList.toggle('hidden', page !== 'trainers');
   if (page === 'classes') loadClasses();
-  if (page === 'trainers' && !trainersLoaded) { trainersLoaded = true; loadTrainers(); loadMyAssignments(); }
+  if (page === 'trainers' && !trainersLoaded) {
+    trainersLoaded = true;
+    var user = getUser();
+    if (user.role === 'trainer') {
+      document.getElementById('my-assignments-section').classList.remove('hidden');
+      loadMyAssignments();
+    }
+  }
   document.getElementById('main-nav').classList.toggle('hidden',      page !== 'landing');
   document.getElementById('profile-nav').classList.toggle('hidden',   page === 'landing');
   window.scrollTo(0, 0);
@@ -58,16 +65,6 @@ function showPage(page) {
     checkActiveSubscription();
     initBillingSection();
     loadPaymentHistory();
-  }
-
-  if (page === 'trainers' && !trainersLoaded) {
-    trainersLoaded = true;
-    loadTrainers();
-    var user = getUser();
-    if (user.role === 'trainer') {
-      document.getElementById('my-assignments-section').classList.remove('hidden');
-      loadMyAssignments();
-    }
   }
 }
 
@@ -181,7 +178,6 @@ async function doRegister() {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('reg-email-err', 'reg-email'); bad = true; }
   if (!phone) { showFieldErr('reg-phone-err', 'reg-phone'); bad = true; }
   if (!dob)   { showFieldErr('reg-dob-err',   'reg-dob');   bad = true; }
-  if (!address) { showFieldErr('reg-address-err', 'reg-address'); bad = true; }
   if (pw.length < 8) { showFieldErr('reg-pw-err',  'reg-password');  bad = true; }
   if (pw !== pw2)    { showFieldErr('reg-pw2-err', 'reg-password2'); bad = true; }
   if (!terms) { showFieldErr('reg-terms-err', null); bad = true; }
@@ -819,6 +815,74 @@ async function submitRenewal() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-sync-alt"></i>&nbsp; Confirm Renewal';
+  }
+}
+
+// — Assign Trainer page —
+
+var atTotalHours = 0;
+
+function clearAssignForm() {
+  document.getElementById('at-trainer-name').value = '';
+  document.getElementById('at-class-type').value   = '';
+  document.getElementById('at-session-date').value = '';
+  document.getElementById('at-hours').value        = '';
+  document.getElementById('at-notes').value        = '';
+  ['at-trainer-name-err','at-class-type-err','at-session-date-err','at-hours-err'].forEach(function(id) {
+    document.getElementById(id).classList.remove('show');
+  });
+}
+
+function assignTrainer() {
+  var trainerName = document.getElementById('at-trainer-name').value.trim();
+  var classType   = document.getElementById('at-class-type').value;
+  var sessionDate = document.getElementById('at-session-date').value;
+  var hours       = document.getElementById('at-hours').value;
+  var notes       = document.getElementById('at-notes').value.trim() || '—';
+
+  ['at-trainer-name-err','at-class-type-err','at-session-date-err','at-hours-err'].forEach(function(id) {
+    document.getElementById(id).classList.remove('show');
+  });
+
+  var bad = false;
+  if (!trainerName) { document.getElementById('at-trainer-name-err').classList.add('show'); bad = true; }
+  if (!classType)   { document.getElementById('at-class-type-err').classList.add('show');   bad = true; }
+  if (!sessionDate) { document.getElementById('at-session-date-err').classList.add('show'); bad = true; }
+  if (!hours || Number(hours) < 1) { document.getElementById('at-hours-err').classList.add('show'); bad = true; }
+  if (bad) return;
+
+  var tbody    = document.getElementById('at-body');
+  var emptyRow = tbody.querySelector('.at-empty-row');
+  if (emptyRow) emptyRow.remove();
+
+  var h       = Number(hours);
+  var dateStr = new Date(sessionDate + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  var row = document.createElement('tr');
+  row.innerHTML =
+    '<td>' + esc(trainerName) + '</td>' +
+    '<td>' + esc(classType) + '</td>' +
+    '<td>' + dateStr + '</td>' +
+    '<td>' + h + '</td>' +
+    '<td>' + esc(notes) + '</td>' +
+    '<td><button type="button" class="delete-btn" onclick="removeAssignment(this,' + h + ')">Delete</button></td>';
+  tbody.appendChild(row);
+
+  atTotalHours += h;
+  document.getElementById('at-total-hours').textContent = atTotalHours;
+  clearAssignForm();
+}
+
+function removeAssignment(btn, hours) {
+  btn.closest('tr').remove();
+  atTotalHours -= hours;
+  document.getElementById('at-total-hours').textContent = atTotalHours;
+  var tbody = document.getElementById('at-body');
+  if (!tbody.rows.length) {
+    var row = document.createElement('tr');
+    row.className = 'at-empty-row';
+    row.innerHTML = '<td colspan="6">No assignments yet. Use the form above to assign a trainer.</td>';
+    tbody.appendChild(row);
   }
 }
 
