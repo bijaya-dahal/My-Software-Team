@@ -8,8 +8,15 @@ backend/node_modules/
 # Mac system file
 .DS_Store
 
+# Windows
+Thumbs.db
+
 # Large installer files
 *.msi
+
+# Log files
+*.log
+backend/*.log
 
 # Stray git clones inside the project folder
 My-Software-Team.git/

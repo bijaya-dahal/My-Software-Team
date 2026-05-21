@@ -2,6 +2,8 @@ const TrainerAssignment = require("../models/TrainerAssignment");
 const User = require("../models/User");
 const Class = require("../models/Class");
 
+// @route  POST /api/trainers/assign
+// @access Private - Staff/Admin only
 const assignTrainer = async(req, res) => {
     try {
         const { trainerId, classId, notes } = req.body;
@@ -10,16 +12,19 @@ const assignTrainer = async(req, res) => {
             return res.status(400).json({ message: "Trainer and class are required" });
         }
 
+        // Check trainer exists and has trainer role
         const trainer = await User.findById(trainerId);
         if (!trainer || trainer.role !== "trainer") {
             return res.status(404).json({ message: "Trainer not found" });
         }
 
+        // Check class exists
         const foundClass = await Class.findById(classId);
         if (!foundClass) {
             return res.status(404).json({ message: "Class not found" });
         }
 
+        // Check if trainer already assigned to this class
         const existingAssignment = await TrainerAssignment.findOne({
             trainer: trainerId,
             class: classId,
@@ -46,6 +51,8 @@ const assignTrainer = async(req, res) => {
     }
 };
 
+// @route  GET /api/trainers/assignments
+// @access Private - Staff/Admin only
 const getAllAssignments = async(req, res) => {
     try {
         const assignments = await TrainerAssignment.find()
@@ -60,6 +67,8 @@ const getAllAssignments = async(req, res) => {
     }
 };
 
+// @route  GET /api/trainers/my-assignments
+// @access Private - Trainer only
 const getMyAssignments = async(req, res) => {
     try {
         const assignments = await TrainerAssignment.find({
@@ -73,6 +82,8 @@ const getMyAssignments = async(req, res) => {
     }
 };
 
+// @route  PUT /api/trainers/assignments/:id/hours
+// @access Private - Staff/Admin only
 const updateHoursWorked = async(req, res) => {
     try {
         const { hoursWorked } = req.body;
@@ -100,6 +111,8 @@ const updateHoursWorked = async(req, res) => {
     }
 };
 
+// @route  GET /api/trainers/hours
+// @access Private - Staff/Admin only
 const getTrainerHours = async(req, res) => {
     try {
         const trainers = await TrainerAssignment.aggregate([{
@@ -137,6 +150,8 @@ const getTrainerHours = async(req, res) => {
     }
 };
 
+// @route  GET /api/trainers
+// @access Private - Staff/Admin only
 const getAllTrainers = async(req, res) => {
     try {
         const trainers = await User.find({ role: "trainer" }).select(
@@ -149,6 +164,22 @@ const getAllTrainers = async(req, res) => {
     }
 };
 
+// @route  GET /api/trainers/list
+// @access Private - Any logged-in user (member, trainer, staff, admin)
+const getTrainerList = async(req, res) => {
+    try {
+        const trainers = await User.find({ role: "trainer", isActive: true }).select(
+            "name phone createdAt"
+        );
+        res.status(200).json({ trainers });
+    } catch (error) {
+        console.error("Get trainer list error:", error.message);
+        res.status(500).json({ message: "Server error fetching trainers" });
+    }
+};
+
+// @route  DELETE /api/trainers/assignments/:id
+// @access Private - Staff/Admin only
 const cancelAssignment = async(req, res) => {
     try {
         const assignment = await TrainerAssignment.findById(req.params.id);
@@ -173,5 +204,6 @@ module.exports = {
     updateHoursWorked,
     getTrainerHours,
     getAllTrainers,
+    getTrainerList,
     cancelAssignment,
 };

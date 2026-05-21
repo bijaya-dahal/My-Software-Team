@@ -1,5 +1,7 @@
 const Class = require("../models/Class");
 
+// @route  POST /api/classes
+// @access Private - Staff/Admin only
 const createClass = async(req, res) => {
     try {
         const { name, description, instructor, date, startTime, endTime, capacity, location, category } = req.body;
@@ -30,6 +32,8 @@ const createClass = async(req, res) => {
     }
 };
 
+// @route  GET /api/classes
+// @access Public
 const getAllClasses = async(req, res) => {
     try {
         const classes = await Class.find({ isActive: true }).sort({ date: 1 });
@@ -40,6 +44,8 @@ const getAllClasses = async(req, res) => {
     }
 };
 
+// @route  GET /api/classes/:id
+// @access Public
 const getClassById = async(req, res) => {
     try {
         const foundClass = await Class.findById(req.params.id).populate(
@@ -58,6 +64,8 @@ const getClassById = async(req, res) => {
     }
 };
 
+// @route  PUT /api/classes/:id
+// @access Private - Staff/Admin only
 const updateClass = async(req, res) => {
     try {
         const foundClass = await Class.findById(req.params.id);
@@ -90,6 +98,8 @@ const updateClass = async(req, res) => {
     }
 };
 
+// @route  DELETE /api/classes/:id
+// @access Private - Staff/Admin only
 const deleteClass = async(req, res) => {
     try {
         const foundClass = await Class.findById(req.params.id);
@@ -108,6 +118,8 @@ const deleteClass = async(req, res) => {
     }
 };
 
+// @route  POST /api/classes/:id/register
+// @access Private - Member
 const registerForClass = async(req, res) => {
     try {
         const foundClass = await Class.findById(req.params.id);
@@ -116,10 +128,12 @@ const registerForClass = async(req, res) => {
             return res.status(404).json({ message: "Class not found" });
         }
 
+        // Check if class is full
         if (foundClass.registeredMembers.length >= foundClass.capacity) {
             return res.status(400).json({ message: "Class is full" });
         }
 
+        // Check if member already registered
         if (foundClass.registeredMembers.includes(req.user.id)) {
             return res.status(400).json({ message: "You are already registered for this class" });
         }
@@ -134,6 +148,8 @@ const registerForClass = async(req, res) => {
     }
 };
 
+// @route  GET /api/classes/my-classes
+// @access Private - Member
 const getMyClasses = async(req, res) => {
     try {
         const classes = await Class.find({

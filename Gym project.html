@@ -41,14 +41,36 @@
 
 <nav class="profile-nav hidden" id="profile-nav">
   <a href="#" class="logo" onclick="showPage('profile'); return false;">EVEREST FITNESS</a>
-  <div class="profile-nav-right">
-    <button type="button" class="profile-nav-link profile-nav-btn" onclick="showPage('plans')">Membership</button>
-    <button type="button" class="profile-nav-link profile-nav-btn" onclick="showPage('classes')">Classes</button>
-    <button type="button" class="profile-nav-link profile-nav-btn" onclick="showPage('trainer')">Trainer</button>
-    <span class="nav-avatar-sm" id="nav-avatar-sm">--</span>
-    <span id="nav-username"></span>
-    <button type="button" class="profile-nav-link profile-nav-btn" onclick="logout()">Logout</button>
+
+  <!-- Profile dropdown (only item on the right) -->
+  <div class="nav-profile" id="nav-profile-btn" onclick="toggleNavDropdown()">
+    <div class="nav-avatar-sm" id="nav-avatar-sm">--</div>
+    <span id="nav-username">Loading&hellip;</span>
+    <i class="fas fa-chevron-down" id="nav-chevron"></i>
+    <div class="nav-dropdown hidden" id="nav-dropdown" onclick="event.stopPropagation()">
+      <div class="nav-dropdown-header">
+        <div class="nav-dropdown-name" id="nav-dropdown-name"></div>
+        <div class="nav-dropdown-role" id="nav-dropdown-role"></div>
+      </div>
+      <button type="button" onclick="showPage('profile'); closeNavDropdown()">
+        <i class="fas fa-user"></i> My Profile
+      </button>
+      <button type="button" onclick="showPage('plans'); closeNavDropdown()">
+        <i class="fas fa-id-card"></i> Membership
+      </button>
+      <button type="button" onclick="showPage('classes'); closeNavDropdown()">
+        <i class="fas fa-calendar-check"></i> Classes
+      </button>
+      <button type="button" onclick="showPage('trainers'); closeNavDropdown()">
+        <i class="fas fa-dumbbell"></i> Trainers
+      </button>
+      <hr class="nav-dropdown-divider">
+      <button type="button" class="nav-logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
   </div>
+
 </nav>
 
 <!-- landing page -->
@@ -572,72 +594,36 @@
   </section>
 </div>
 
-<!-- trainer page -->
-<div id="page-trainer" class="hidden">
+<!-- trainers page -->
+<div id="page-trainers" class="hidden">
+
   <section class="section dark-bg">
     <div class="sec-header">
-      <span class="eyebrow">Staff Management</span>
-      <h2>ASSIGN <span>TRAINER</span></h2>
-      <p>Add trainer assignments for gym classes and track total session hours.</p>
+      <span class="eyebrow">Everest Fitness Team</span>
+      <h2>MEET OUR <span>TRAINERS</span></h2>
+      <p>Our certified professional trainers are here to guide your fitness journey in Nepal.</p>
     </div>
-    <div class="trainer-wrap">
-      <div class="trainer-form-grid">
-        <div class="form-group">
-          <label for="trainerName">Trainer Name</label>
-          <input type="text" id="trainerName" placeholder="e.g. Rajesh Sharma">
-        </div>
-        <div class="form-group">
-          <label for="classType">Class Type</label>
-          <select id="classType">
-            <option value="">Select class</option>
-            <option>Yoga</option>
-            <option>Zumba</option>
-            <option>Cardio</option>
-            <option>Strength Training</option>
-            <option>CrossFit</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="sessionDate">Session Date</label>
-          <input type="date" id="sessionDate">
-        </div>
-        <div class="form-group">
-          <label for="sessionHours">Hours</label>
-          <input type="number" id="sessionHours" min="1" placeholder="Enter hours">
-        </div>
-        <div class="form-group trainer-notes">
-          <label for="notes">Notes</label>
-          <textarea id="notes" placeholder="Special instructions or class notes"></textarea>
-        </div>
-      </div>
-      <div class="trainer-btn-group">
-        <button type="button" id="assignButton" class="btn-primary">Assign Trainer</button>
-        <button type="button" id="resetButton" class="btn-outline">Clear</button>
-      </div>
-      <div class="trainer-table-wrap">
-        <h3>Trainer Assignments</h3>
-        <div class="trainer-table-scroll">
-          <table class="trainer-table">
-            <thead>
-              <tr>
-                <th>Trainer</th>
-                <th>Class</th>
-                <th>Date</th>
-                <th>Hours</th>
-                <th>Notes</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="assignmentBody"></tbody>
-          </table>
-        </div>
-        <div class="trainer-summary">
-          <span>Total Trainer Hours</span>
-          <strong id="totalHours">0</strong>
-        </div>
+    <div class="trainers-grid" id="trainers-grid">
+      <div class="trainers-loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading trainers&hellip;
       </div>
     </div>
   </section>
+
+  <!-- My Assignments — visible only to trainer role -->
+  <section class="section hidden" id="my-assignments-section">
+    <div class="sec-header">
+      <span class="eyebrow">Your Schedule</span>
+      <h2>MY <span>ASSIGNMENTS</span></h2>
+      <p>Your upcoming class assignments at Everest Fitness.</p>
+    </div>
+    <div id="assignments-list">
+      <div class="trainers-loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading your schedule&hellip;
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <!-- auth modal -->
@@ -713,6 +699,26 @@
         <label for="reg-dob">Date of Birth</label>
         <input type="date" id="reg-dob">
         <div class="field-error" id="reg-dob-err">Date of birth is required.</div>
+      </div>
+      <div class="form-group">
+        <label for="reg-address">Address <span class="field-optional">(optional)</span></label>
+        <input type="text" id="reg-address" placeholder="e.g. Kathmandu, Thamel" list="nepal-cities" autocomplete="off">
+        <datalist id="nepal-cities">
+          <option value="Kathmandu">
+          <option value="Pokhara">
+          <option value="Lalitpur">
+          <option value="Bhaktapur">
+          <option value="Biratnagar">
+          <option value="Birgunj">
+          <option value="Dharan">
+          <option value="Butwal">
+          <option value="Hetauda">
+          <option value="Nepalgunj">
+          <option value="Dhangadhi">
+          <option value="Itahari">
+          <option value="Janakpur">
+          <option value="Bharatpur">
+        </datalist>
       </div>
       <div class="form-group">
         <label for="reg-password">Password</label>

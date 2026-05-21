@@ -1,5 +1,6 @@
-const USER_API = 'http://localhost:5000/api/users';
+const USER_API      = 'http://localhost:5000/api/users';
 const MEMBERSHIP_API = 'http://localhost:5000/api/memberships';
+const TRAINER_API    = 'http://localhost:5000/api/trainers';
 
 // Single source of truth for plan prices — used by BOTH landing page and logged-in plans page
 var FALLBACK_PLANS = [
@@ -35,27 +36,38 @@ function getToken() {
   return localStorage.getItem('ef_token');
 }
 
-let plansLoaded = false;
+let plansLoaded    = false;
+let trainersLoaded = false;
 
 // Show the right page section
 function showPage(page) {
-  document.getElementById('page-landing').classList.toggle('hidden', page !== 'landing');
-  document.getElementById('page-profile').classList.toggle('hidden', page !== 'profile');
-  document.getElementById('page-plans').classList.toggle('hidden',   page !== 'plans');
-  document.getElementById('page-classes').classList.toggle('hidden', page !== 'classes');
-  document.getElementById('page-trainer').classList.toggle('hidden', page !== 'trainer');
+  document.getElementById('page-landing').classList.toggle('hidden',  page !== 'landing');
+  document.getElementById('page-profile').classList.toggle('hidden',  page !== 'profile');
+  document.getElementById('page-plans').classList.toggle('hidden',    page !== 'plans');
+  document.getElementById('page-classes').classList.toggle('hidden',  page !== 'classes');
+  document.getElementById('page-trainers').classList.toggle('hidden', page !== 'trainers');
   if (page === 'classes') loadClasses();
-  document.getElementById('main-nav').classList.toggle('hidden',     page !== 'landing');
-  document.getElementById('profile-nav').classList.toggle('hidden',  page === 'landing');
+  if (page === 'trainers' && !trainersLoaded) { trainersLoaded = true; loadTrainers(); loadMyAssignments(); }
+  document.getElementById('main-nav').classList.toggle('hidden',      page !== 'landing');
+  document.getElementById('profile-nav').classList.toggle('hidden',   page === 'landing');
   window.scrollTo(0, 0);
-  // Only load plans once
+
   if (page === 'plans' && !plansLoaded) {
     plansLoaded = true;
     loadPlans();
     checkActiveSubscription();
-
     initBillingSection();
     loadPaymentHistory();
+  }
+
+  if (page === 'trainers' && !trainersLoaded) {
+    trainersLoaded = true;
+    loadTrainers();
+    var user = getUser();
+    if (user.role === 'trainer') {
+      document.getElementById('my-assignments-section').classList.remove('hidden');
+      loadMyAssignments();
+    }
   }
 }
 
@@ -157,9 +169,9 @@ async function doRegister() {
   var lname = document.getElementById('reg-lname').value.trim();
   var email = document.getElementById('reg-email').value.trim().toLowerCase();
   var phone = document.getElementById('reg-phone').value.trim();
-  var dob   = document.getElementById('reg-dob').value;
-  var city  = document.getElementById('reg-city').value.trim();
-  var pw    = document.getElementById('reg-password').value;
+  var dob     = document.getElementById('reg-dob').value;
+  var address = document.getElementById('reg-address').value.trim();
+  var pw      = document.getElementById('reg-password').value;
   var pw2   = document.getElementById('reg-password2').value;
   var terms = document.getElementById('reg-terms').checked;
 
@@ -169,7 +181,7 @@ async function doRegister() {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('reg-email-err', 'reg-email'); bad = true; }
   if (!phone) { showFieldErr('reg-phone-err', 'reg-phone'); bad = true; }
   if (!dob)   { showFieldErr('reg-dob-err',   'reg-dob');   bad = true; }
-  if (!city)  { showFieldErr('reg-city-err',  'reg-city');  bad = true; }
+  if (!address) { showFieldErr('reg-address-err', 'reg-address'); bad = true; }
   if (pw.length < 8) { showFieldErr('reg-pw-err',  'reg-password');  bad = true; }
   if (pw !== pw2)    { showFieldErr('reg-pw2-err', 'reg-password2'); bad = true; }
   if (!terms) { showFieldErr('reg-terms-err', null); bad = true; }
@@ -180,7 +192,7 @@ async function doRegister() {
     var res = await fetch(USER_API + '/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: fname + ' ' + lname, email, password: pw, role: document.getElementById('reg-role').value, phone, dateOfBirth: dob, address: city })
+      body: JSON.stringify({ name: fname + ' ' + lname, email, password: pw, role: document.getElementById('reg-role').value, phone, dateOfBirth: dob, address })
     });
     var data = await res.json();
     if (!res.ok) { showAlert('reg-err-msg', data.message || 'Registration failed.'); return; }
@@ -230,8 +242,36 @@ async function doLogin() {
 function logout() {
   localStorage.removeItem('ef_token');
   localStorage.removeItem('ef_user');
+  plansLoaded    = false;
+  trainersLoaded = false;
+  closeNavDropdown();
   showPage('landing');
 }
+
+function toggleNavDropdown() {
+  var dropdown = document.getElementById('nav-dropdown');
+  var chevron  = document.getElementById('nav-chevron');
+  var isOpen   = !dropdown.classList.contains('hidden');
+  if (isOpen) {
+    dropdown.classList.add('hidden');
+    chevron.classList.remove('nd-open');
+  } else {
+    dropdown.classList.remove('hidden');
+    chevron.classList.add('nd-open');
+  }
+}
+
+function closeNavDropdown() {
+  var dropdown = document.getElementById('nav-dropdown');
+  var chevron  = document.getElementById('nav-chevron');
+  if (dropdown) { dropdown.classList.add('hidden'); }
+  if (chevron)  { chevron.classList.remove('nd-open'); }
+}
+
+document.addEventListener('click', function(e) {
+  var btn = document.getElementById('nav-profile-btn');
+  if (btn && !btn.contains(e.target)) closeNavDropdown();
+});
 
 function getInitials(name) {
   var parts = name.trim().split(' ');
@@ -255,14 +295,22 @@ async function loadProfile() {
     var data = await res.json();
     var u = data.user || data;
 
-    document.getElementById('nav-username').textContent    = u.name;
-    document.getElementById('nav-avatar-sm').textContent   = getInitials(u.name);
-    document.getElementById('profile-avatar').textContent  = getInitials(u.name);
-    document.getElementById('profile-name').textContent    = u.name;
-    document.getElementById('profile-email').textContent   = u.email;
-    var storedUser = getUser();
+    var initials    = getInitials(u.name);
+    var storedUser  = getUser();
     var displayRole = (storedUser.role || u.role || 'member');
-    document.getElementById('profile-role').textContent = displayRole[0].toUpperCase() + displayRole.slice(1);
+    var roleLabel   = displayRole[0].toUpperCase() + displayRole.slice(1);
+
+    // nav avatar dropdown
+    document.getElementById('nav-avatar-sm').textContent     = initials;
+    document.getElementById('nav-username').textContent      = u.name.split(' ')[0];
+    document.getElementById('nav-dropdown-name').textContent = u.name;
+    document.getElementById('nav-dropdown-role').textContent = roleLabel;
+
+    // profile page
+    document.getElementById('profile-avatar').textContent = initials;
+    document.getElementById('profile-name').textContent   = u.name;
+    document.getElementById('profile-email').textContent  = u.email;
+    document.getElementById('profile-role').textContent   = roleLabel;
 
     document.getElementById('view-name').textContent    = u.name    || '-';
     document.getElementById('view-email').textContent   = u.email   || '-';
@@ -811,60 +859,104 @@ async function loadClasses() {
   }
 }
 
-// — Trainer Assignment (merged from assign_trainer) —
+// — Trainers page —
 
-var totalHours = 0;
-
-function clearTrainerForm() {
-  document.getElementById('trainerName').value  = '';
-  document.getElementById('classType').value    = '';
-  document.getElementById('sessionDate').value  = '';
-  document.getElementById('sessionHours').value = '';
-  document.getElementById('notes').value        = '';
+async function loadTrainers() {
+  var grid = document.getElementById('trainers-grid');
+  try {
+    var res  = await fetch(TRAINER_API + '/list', {
+      headers: { 'Authorization': 'Bearer ' + getToken() }
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Server error');
+    renderTrainers(data.trainers || []);
+  } catch(e) {
+    grid.innerHTML =
+      '<div class="trainers-empty">' +
+      '<i class="fas fa-users-slash"></i>' +
+      '<p>Could not load trainers. Please ensure the backend is running.</p>' +
+      '</div>';
+  }
 }
 
-function createAssignmentRow(data) {
-  var tbody = document.getElementById('assignmentBody');
-  var row   = document.createElement('tr');
-  row.innerHTML =
-    '<td>' + data.trainerName  + '</td>' +
-    '<td>' + data.classType    + '</td>' +
-    '<td>' + data.sessionDate  + '</td>' +
-    '<td>' + data.sessionHours + '</td>' +
-    '<td>' + data.notes        + '</td>' +
-    '<td><button class="delete-btn" type="button">Delete</button></td>';
-
-  row.querySelector('.delete-btn').addEventListener('click', function() {
-    row.remove();
-    totalHours -= Number(data.sessionHours);
-    document.getElementById('totalHours').textContent = totalHours;
-  });
-
-  tbody.appendChild(row);
+function trainerInitials(name) {
+  var parts = (name || '').trim().split(' ');
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return (name || '--').substring(0, 2).toUpperCase();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  var assignBtn = document.getElementById('assignButton');
-  var resetBtn  = document.getElementById('resetButton');
-  if (!assignBtn) return;
+function renderTrainers(trainers) {
+  var grid = document.getElementById('trainers-grid');
+  if (!trainers.length) {
+    grid.innerHTML =
+      '<div class="trainers-empty">' +
+      '<i class="fas fa-user-plus"></i>' +
+      '<p>No trainers registered yet. Trainers will appear here once added by staff.</p>' +
+      '</div>';
+    return;
+  }
+  grid.innerHTML = '';
+  trainers.forEach(function(t) {
+    var card = document.createElement('div');
+    card.className = 'trainer-card';
+    card.innerHTML =
+      '<div class="trainer-avatar">' + esc(trainerInitials(t.name)) + '</div>' +
+      '<div class="trainer-info">' +
+        '<h3 class="trainer-name">' + esc(t.name) + '</h3>' +
+        '<span class="trainer-badge"><i class="fas fa-certificate"></i> Certified Trainer</span>' +
+        (t.phone
+          ? '<div class="trainer-contact"><i class="fas fa-phone"></i> ' + esc(t.phone) + '</div>'
+          : '<div class="trainer-contact trainer-contact-na"><i class="fas fa-phone"></i> Contact via reception</div>') +
+        '<div class="trainer-contact"><i class="fas fa-map-marker-alt"></i> Everest Fitness, Nepal</div>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
 
-  assignBtn.addEventListener('click', function() {
-    var trainerName  = document.getElementById('trainerName').value.trim();
-    var classType    = document.getElementById('classType').value;
-    var sessionDate  = document.getElementById('sessionDate').value;
-    var sessionHours = document.getElementById('sessionHours').value;
-    var notes        = document.getElementById('notes').value.trim() || '—';
+async function loadMyAssignments() {
+  var list = document.getElementById('assignments-list');
+  try {
+    var res  = await fetch(TRAINER_API + '/my-assignments', {
+      headers: { 'Authorization': 'Bearer ' + getToken() }
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Server error');
+    renderAssignments(data.assignments || []);
+  } catch(e) {
+    list.innerHTML =
+      '<div class="trainers-empty"><i class="fas fa-calendar-times"></i><p>Could not load your schedule.</p></div>';
+  }
+}
 
-    if (!trainerName || !classType || !sessionDate || !sessionHours) {
-      alert('Please complete all required fields.');
-      return;
-    }
+function renderAssignments(assignments) {
+  var list = document.getElementById('assignments-list');
+  if (!assignments.length) {
+    list.innerHTML =
+      '<div class="trainers-empty">' +
+      '<i class="fas fa-calendar-check"></i>' +
+      '<p>No assignments yet. Your class schedule will appear here once staff assigns you.</p>' +
+      '</div>';
+    return;
+  }
+  var html = '<div class="assignments-table-wrap"><table class="assignments-table">' +
+    '<thead><tr><th>Class</th><th>Date</th><th>Time</th><th>Location</th><th>Status</th></tr></thead><tbody>';
 
-    createAssignmentRow({ trainerName, classType, sessionDate, sessionHours, notes });
-    totalHours += Number(sessionHours);
-    document.getElementById('totalHours').textContent = totalHours;
-    clearTrainerForm();
+  assignments.forEach(function(a) {
+    var cls     = a.class || {};
+    var date    = cls.date ? new Date(cls.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    var time    = cls.startTime && cls.endTime ? cls.startTime + ' – ' + cls.endTime : '—';
+    var status  = (a.status || 'assigned').toLowerCase();
+    var badgeClass = status === 'completed' ? 'status-badge paid' : status === 'cancelled' ? 'status-badge failed' : 'status-badge active';
+    html +=
+      '<tr>' +
+      '<td>' + esc(cls.name || '—') + '</td>' +
+      '<td>' + date + '</td>' +
+      '<td>' + esc(time) + '</td>' +
+      '<td>' + esc(cls.location || 'TBC') + '</td>' +
+      '<td><span class="' + badgeClass + '">' + esc(status) + '</span></td>' +
+      '</tr>';
   });
 
-  resetBtn.addEventListener('click', clearTrainerForm);
-});
+  html += '</tbody></table></div>';
+  list.innerHTML = html;
+}

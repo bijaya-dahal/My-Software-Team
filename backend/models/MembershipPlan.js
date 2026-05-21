@@ -4,8 +4,8 @@ const membershipPlanSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, "Plan name is required"],
+        enum: ["Basic", "Premium", "Elite"],
         unique: true,
-        trim: true,
     },
     price: {
         type: Number,
@@ -14,6 +14,7 @@ const membershipPlanSchema = new mongoose.Schema({
     duration: {
         type: Number,
         required: [true, "Duration is required"],
+        comment: "Duration in days e.g. 30, 90, 365",
     },
     description: {
         type: String,
