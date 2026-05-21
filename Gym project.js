@@ -120,24 +120,42 @@ async function doRegister() {
     var pw2 = document.getElementById('reg-password2').value;
     var terms = document.getElementById('reg-terms').checked;
     var bad = false;
-    if (!fname) { showFieldErr('reg-fname-err', 'reg-fname');
-        bad = true; }
-    if (!lname) { showFieldErr('reg-lname-err', 'reg-lname');
-        bad = true; }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('reg-email-err', 'reg-email');
-        bad = true; }
-    if (!phone) { showFieldErr('reg-phone-err', 'reg-phone');
-        bad = true; }
-    if (!dob) { showFieldErr('reg-dob-err', 'reg-dob');
-        bad = true; }
-    if (!city) { showFieldErr('reg-city-err', 'reg-city');
-        bad = true; }
-    if (pw.length < 8) { showFieldErr('reg-pw-err', 'reg-password');
-        bad = true; }
-    if (pw !== pw2) { showFieldErr('reg-pw2-err', 'reg-password2');
-        bad = true; }
-    if (!terms) { showFieldErr('reg-terms-err', null);
-        bad = true; }
+    if (!fname) {
+        showFieldErr('reg-fname-err', 'reg-fname');
+        bad = true;
+    }
+    if (!lname) {
+        showFieldErr('reg-lname-err', 'reg-lname');
+        bad = true;
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldErr('reg-email-err', 'reg-email');
+        bad = true;
+    }
+    if (!phone) {
+        showFieldErr('reg-phone-err', 'reg-phone');
+        bad = true;
+    }
+    if (!dob) {
+        showFieldErr('reg-dob-err', 'reg-dob');
+        bad = true;
+    }
+    if (!city) {
+        showFieldErr('reg-city-err', 'reg-city');
+        bad = true;
+    }
+    if (pw.length < 8) {
+        showFieldErr('reg-pw-err', 'reg-password');
+        bad = true;
+    }
+    if (pw !== pw2) {
+        showFieldErr('reg-pw2-err', 'reg-password2');
+        bad = true;
+    }
+    if (!terms) {
+        showFieldErr('reg-terms-err', null);
+        bad = true;
+    }
     if (bad) { showAlert('reg-err-msg', 'Please fix the errors above.'); return; }
     setLoading('reg-btn', true, 'Create Account');
     try {
@@ -163,10 +181,14 @@ async function doLogin() {
     var email = document.getElementById('login-email').value.trim().toLowerCase();
     var pw = document.getElementById('login-password').value;
     var bad = false;
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('login-email-err', 'login-email');
-        bad = true; }
-    if (!pw) { showFieldErr('login-pw-err', 'login-password');
-        bad = true; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldErr('login-email-err', 'login-email');
+        bad = true;
+    }
+    if (!pw) {
+        showFieldErr('login-pw-err', 'login-password');
+        bad = true;
+    }
     if (bad) return;
     setLoading('login-btn', true, 'Log In');
     try {
@@ -289,8 +311,10 @@ async function saveProfile() {
 }
 
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { closeModal();
-        closeMenu(); }
+    if (e.key === 'Escape') {
+        closeModal();
+        closeMenu();
+    }
     if (e.key !== 'Enter') return;
     if (!document.getElementById('modal-overlay').classList.contains('open')) return;
     if (document.getElementById('login-section').classList.contains('hidden')) doRegister();
@@ -468,14 +492,22 @@ async function submitPayment() {
     var plan = document.getElementById('pay-plan').value;
     var method = document.getElementById('pay-method').value;
     var bad = false;
-    if (!name) { showFieldErr('pay-name-err', 'pay-name');
-        bad = true; }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('pay-email-err', 'pay-email');
-        bad = true; }
-    if (!plan) { showFieldErr('pay-plan-err', 'pay-plan');
-        bad = true; }
-    if (!method) { showFieldErr('pay-method-err', 'pay-method');
-        bad = true; }
+    if (!name) {
+        showFieldErr('pay-name-err', 'pay-name');
+        bad = true;
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldErr('pay-email-err', 'pay-email');
+        bad = true;
+    }
+    if (!plan) {
+        showFieldErr('pay-plan-err', 'pay-plan');
+        bad = true;
+    }
+    if (!method) {
+        showFieldErr('pay-method-err', 'pay-method');
+        bad = true;
+    }
     if (bad) { showAlert('pay-error', 'Please fix the errors below.'); return; }
     var token = getToken();
     if (!token) { showAlert('pay-error', 'You must be logged in to subscribe.'); return; }
