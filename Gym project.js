@@ -1,15 +1,12 @@
 const USER_API = 'http://localhost:5000/api/users';
 const MEMBERSHIP_API = 'http://localhost:5000/api/memberships';
 
-
-// Get token from local storage
 function getToken() {
     return localStorage.getItem('ef_token');
 }
 
 let plansLoaded = false;
 
-// Show the right page section
 function showPage(page) {
     document.getElementById('page-landing').classList.toggle('hidden', page !== 'landing');
     document.getElementById('page-profile').classList.toggle('hidden', page !== 'profile');
@@ -20,17 +17,14 @@ function showPage(page) {
     document.getElementById('main-nav').classList.toggle('hidden', page !== 'landing');
     document.getElementById('profile-nav').classList.toggle('hidden', page === 'landing');
     window.scrollTo(0, 0);
-    // Only load plans once
     if (page === 'plans' && !plansLoaded) {
         plansLoaded = true;
         loadPlans();
         checkActiveSubscription();
-
         initBillingSection();
         loadPaymentHistory();
     }
 }
-
 
 function openModal(tab) {
     document.getElementById('modal-overlay').classList.add('open');
@@ -48,41 +42,33 @@ function overlayClick(e) {
 }
 
 function toggleMenu() {
-    var open = document.getElementById('slide-menu').classList.contains('open');
-    open ? closeMenu() : openMenuPanel();
-}
-
-function openMenuPanel() {
-    document.getElementById('slide-menu').classList.add('open');
-    document.getElementById('burger-btn').classList.add('open');
-    document.getElementById('slide-backdrop').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    document.getElementById('mobile-menu').classList.toggle('open');
 }
 
 function closeMenu() {
-    document.getElementById('slide-menu').classList.remove('open');
-    document.getElementById('burger-btn').classList.remove('open');
-    document.getElementById('slide-backdrop').classList.remove('open');
-    document.body.style.overflow = '';
+    var menu = document.getElementById('mobile-menu');
+    if (menu) menu.classList.remove('open');
 }
-
-window.addEventListener('scroll', function() {
-    document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 50);
-});
 
 function showAlert(id, msg) {
     var el = document.getElementById(id);
+    if (!el) return;
     if (msg) el.textContent = msg;
     el.classList.add('show');
 }
 
 function hideAlert(id) {
-    document.getElementById(id).classList.remove('show');
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('show');
 }
 
 function showFieldErr(errId, inputId) {
-    document.getElementById(errId).classList.add('show');
-    if (inputId) document.getElementById(inputId).classList.add('error');
+    var err = document.getElementById(errId);
+    if (err) err.classList.add('show');
+    if (inputId) {
+        var inp = document.getElementById(inputId);
+        if (inp) inp.classList.add('error');
+    }
 }
 
 function clearErrors(sectionId) {
@@ -124,7 +110,6 @@ function togglePw(id, btn) {
 async function doRegister() {
     clearErrors('register-section');
     hideAlert('reg-err-msg');
-
     var fname = document.getElementById('reg-fname').value.trim();
     var lname = document.getElementById('reg-lname').value.trim();
     var email = document.getElementById('reg-email').value.trim().toLowerCase();
@@ -134,46 +119,26 @@ async function doRegister() {
     var pw = document.getElementById('reg-password').value;
     var pw2 = document.getElementById('reg-password2').value;
     var terms = document.getElementById('reg-terms').checked;
-
     var bad = false;
-    if (!fname) {
-        showFieldErr('reg-fname-err', 'reg-fname');
-        bad = true;
-    }
-    if (!lname) {
-        showFieldErr('reg-lname-err', 'reg-lname');
-        bad = true;
-    }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showFieldErr('reg-email-err', 'reg-email');
-        bad = true;
-    }
-    if (!phone) {
-        showFieldErr('reg-phone-err', 'reg-phone');
-        bad = true;
-    }
-    if (!dob) {
-        showFieldErr('reg-dob-err', 'reg-dob');
-        bad = true;
-    }
-    if (!city) {
-        showFieldErr('reg-city-err', 'reg-city');
-        bad = true;
-    }
-    if (pw.length < 8) {
-        showFieldErr('reg-pw-err', 'reg-password');
-        bad = true;
-    }
-    if (pw !== pw2) {
-        showFieldErr('reg-pw2-err', 'reg-password2');
-        bad = true;
-    }
-    if (!terms) {
-        showFieldErr('reg-terms-err', null);
-        bad = true;
-    }
+    if (!fname) { showFieldErr('reg-fname-err', 'reg-fname');
+        bad = true; }
+    if (!lname) { showFieldErr('reg-lname-err', 'reg-lname');
+        bad = true; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('reg-email-err', 'reg-email');
+        bad = true; }
+    if (!phone) { showFieldErr('reg-phone-err', 'reg-phone');
+        bad = true; }
+    if (!dob) { showFieldErr('reg-dob-err', 'reg-dob');
+        bad = true; }
+    if (!city) { showFieldErr('reg-city-err', 'reg-city');
+        bad = true; }
+    if (pw.length < 8) { showFieldErr('reg-pw-err', 'reg-password');
+        bad = true; }
+    if (pw !== pw2) { showFieldErr('reg-pw2-err', 'reg-password2');
+        bad = true; }
+    if (!terms) { showFieldErr('reg-terms-err', null);
+        bad = true; }
     if (bad) { showAlert('reg-err-msg', 'Please fix the errors above.'); return; }
-
     setLoading('reg-btn', true, 'Create Account');
     try {
         var res = await fetch(USER_API + '/register', {
@@ -195,21 +160,14 @@ async function doRegister() {
 async function doLogin() {
     clearErrors('login-section');
     hideAlert('login-err-msg');
-
     var email = document.getElementById('login-email').value.trim().toLowerCase();
     var pw = document.getElementById('login-password').value;
-
     var bad = false;
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showFieldErr('login-email-err', 'login-email');
-        bad = true;
-    }
-    if (!pw) {
-        showFieldErr('login-pw-err', 'login-password');
-        bad = true;
-    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('login-email-err', 'login-email');
+        bad = true; }
+    if (!pw) { showFieldErr('login-pw-err', 'login-password');
+        bad = true; }
     if (bad) return;
-
     setLoading('login-btn', true, 'Log In');
     try {
         var res = await fetch(USER_API + '/login', {
@@ -219,7 +177,6 @@ async function doLogin() {
         });
         var data = await res.json();
         if (!res.ok) { showAlert('login-err-msg', data.message || 'Invalid email or password.'); return; }
-
         localStorage.setItem('ef_token', data.token);
         localStorage.setItem('ef_user', JSON.stringify(data.user));
         closeModal();
@@ -254,32 +211,26 @@ async function loadProfile() {
         var res = await fetch(USER_API + '/profile', {
             headers: { 'Authorization': 'Bearer ' + getToken() }
         });
-
         if (res.status === 401) { logout(); return; }
-
         var data = await res.json();
         var u = data.user || data;
-
         document.getElementById('nav-username').textContent = u.name;
         document.getElementById('nav-avatar-sm').textContent = getInitials(u.name);
         document.getElementById('profile-avatar').textContent = getInitials(u.name);
         document.getElementById('profile-name').textContent = u.name;
         document.getElementById('profile-email').textContent = u.email;
         document.getElementById('profile-role').textContent = u.role ? (u.role[0].toUpperCase() + u.role.slice(1)) : 'Member';
-
         document.getElementById('view-name').textContent = u.name || '-';
         document.getElementById('view-email').textContent = u.email || '-';
         document.getElementById('view-phone').textContent = u.phone || 'Not set';
         document.getElementById('view-dob').textContent = formatDate(u.dateOfBirth);
         document.getElementById('view-address').textContent = u.address || 'Not set';
         document.getElementById('view-joined').textContent = formatDate(u.createdAt);
-
         document.getElementById('edit-name').value = u.name || '';
         document.getElementById('edit-email').value = u.email || '';
         document.getElementById('edit-phone').value = u.phone || '';
         document.getElementById('edit-address').value = u.address || '';
         if (u.dateOfBirth) document.getElementById('edit-dob').value = u.dateOfBirth.split('T')[0];
-
     } catch (e) {
         showAlert('error-msg', 'Failed to load profile. Please refresh the page.');
     }
@@ -302,44 +253,33 @@ async function saveProfile() {
     hideAlert('error-msg');
     hideAlert('success-msg');
     document.getElementById('edit-name-err').classList.remove('show');
-
     var name = document.getElementById('edit-name').value.trim();
     var phone = document.getElementById('edit-phone').value.trim();
     var dob = document.getElementById('edit-dob').value;
     var address = document.getElementById('edit-address').value.trim();
-
     if (!name) { document.getElementById('edit-name-err').classList.add('show'); return; }
-
     var btn = document.getElementById('save-btn');
     btn.disabled = true;
     btn.textContent = 'Saving...';
-
     try {
         var body = { name };
         if (phone) body.phone = phone;
         if (dob) body.dateOfBirth = dob;
         if (address) body.address = address;
-
         var res = await fetch(USER_API + '/profile', {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getToken()
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
             body: JSON.stringify(body)
         });
         var data = await res.json();
         if (!res.ok) { showAlert('error-msg', data.message || 'Update failed.'); return; }
-
         var stored = JSON.parse(localStorage.getItem('ef_user') || '{}');
         stored.name = name;
         localStorage.setItem('ef_user', JSON.stringify(stored));
-
         await loadProfile();
         cancelEdit();
         showAlert('success-msg', 'Profile updated successfully!');
         setTimeout(function() { hideAlert('success-msg'); }, 4000);
-
     } catch (e) {
         showAlert('error-msg', 'Could not connect to the server. Please try again.');
     } finally {
@@ -349,10 +289,8 @@ async function saveProfile() {
 }
 
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeModal();
-        closeMenu();
-    }
+    if (e.key === 'Escape') { closeModal();
+        closeMenu(); }
     if (e.key !== 'Enter') return;
     if (!document.getElementById('modal-overlay').classList.contains('open')) return;
     if (document.getElementById('login-section').classList.contains('hidden')) doRegister();
@@ -369,7 +307,6 @@ if (getToken()) {
 var currentPlanId = '';
 var currentPlan = '';
 var currentPrice = 0;
-
 var renewalPlanId = '';
 var renewalPlanName = '';
 var renewalPrice = 0;
@@ -404,9 +341,7 @@ async function loadPlans() {
         if (!res.ok) throw new Error(data.message || 'Server error');
         renderPlans(data.plans || []);
     } catch (e) {
-        grid.innerHTML =
-            '<div class="plans-error"><i class="fas fa-exclamation-triangle"></i> ' +
-            'Could not load plans. Please ensure the server is running.</div>';
+        grid.innerHTML = '<div class="plans-error"><i class="fas fa-exclamation-triangle"></i> Could not load plans. Please ensure the server is running.</div>';
     }
 }
 
@@ -414,22 +349,18 @@ function renderPlans(plans) {
     var grid = document.getElementById('plans-grid');
     var dropdown = document.getElementById('pay-plan');
     var renewDrop = document.getElementById('renew-plan');
-
     if (!plans.length) {
         grid.innerHTML = '<div class="plans-error"><i class="fas fa-info-circle"></i> No plans available at this time.</div>';
         return;
     }
-
     grid.innerHTML = '';
     dropdown.innerHTML = '<option value="">&#8212; Select a plan &#8212;</option>';
     renewDrop.innerHTML = '<option value="">&#8212; Same as current plan &#8212;</option>';
-
     plans.forEach(function(plan) {
         var featHtml = '';
         (plan.features || []).forEach(function(f) {
             featHtml += '<li><i class="fas fa-check-circle"></i> ' + esc(f) + '</li>';
         });
-
         var card = document.createElement('div');
         card.className = 'plan-card';
         card.dataset.planId = plan._id;
@@ -440,19 +371,14 @@ function renderPlans(plans) {
             (plan.description ? '<div class="plan-description">' + esc(plan.description) + '</div>' : '') +
             '<hr>' +
             (featHtml ? '<ul class="plan-features">' + featHtml + '</ul>' : '') +
-            '<button type="button" class="btn-plan" ' +
-            'onclick="selectPlan(\'' + plan._id + '\',\'' + esc(plan.name) + '\',' + plan.price + ',' + plan.duration + ')">' +
-            'Get Started</button>';
+            '<button type="button" class="btn-plan" onclick="selectPlan(\'' + plan._id + '\',\'' + esc(plan.name) + '\',' + plan.price + ',' + plan.duration + ')">Get Started</button>';
         grid.appendChild(card);
-
         var optVal = plan._id + '|' + plan.name + '|' + plan.price + '|' + plan.duration;
         var optText = plan.name + ' — £' + plan.price.toLocaleString() + '/mo (' + durationLabel(plan.duration) + ')';
-
         var opt = document.createElement('option');
         opt.value = optVal;
         opt.textContent = optText;
         dropdown.appendChild(opt);
-
         var renewOpt = document.createElement('option');
         renewOpt.value = optVal;
         renewOpt.textContent = optText;
@@ -474,11 +400,7 @@ async function checkActiveSubscription() {
 }
 
 function showSubBanner(sub) {
-    var endDate = new Date(sub.endDate).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
+    var endDate = new Date(sub.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
     document.getElementById('active-plan-name').textContent = sub.plan ? sub.plan.name : 'Active';
     document.getElementById('active-end-date').textContent = endDate;
     document.getElementById('active-sub-banner').classList.remove('hidden');
@@ -509,15 +431,12 @@ function selectPlan(planId, planName, price, duration) {
     currentPlanId = planId;
     currentPlan = planName;
     currentPrice = price;
-
     document.querySelectorAll('.plan-card').forEach(function(c) {
         c.classList.toggle('selected', c.dataset.planId === planId);
     });
-
     document.getElementById('summary-plan').textContent = planName + ' Plan';
     document.getElementById('summary-duration').textContent = durationLabel(duration || 30);
     document.getElementById('summary-total').textContent = '£' + price.toLocaleString();
-
     var dd = document.getElementById('pay-plan');
     for (var i = 0; i < dd.options.length; i++) {
         if (dd.options[i].value.startsWith(planId + '|')) { dd.selectedIndex = i; break; }
@@ -544,43 +463,29 @@ async function submitPayment() {
     clearBillingErrors();
     hideAlert('pay-success');
     hideAlert('pay-error');
-
     var name = document.getElementById('pay-name').value.trim();
     var email = document.getElementById('pay-email').value.trim().toLowerCase();
     var plan = document.getElementById('pay-plan').value;
     var method = document.getElementById('pay-method').value;
-
     var bad = false;
-    if (!name) {
-        showFieldErr('pay-name-err', 'pay-name');
-        bad = true;
-    }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showFieldErr('pay-email-err', 'pay-email');
-        bad = true;
-    }
-    if (!plan) {
-        showFieldErr('pay-plan-err', 'pay-plan');
-        bad = true;
-    }
-    if (!method) {
-        showFieldErr('pay-method-err', 'pay-method');
-        bad = true;
-    }
+    if (!name) { showFieldErr('pay-name-err', 'pay-name');
+        bad = true; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldErr('pay-email-err', 'pay-email');
+        bad = true; }
+    if (!plan) { showFieldErr('pay-plan-err', 'pay-plan');
+        bad = true; }
+    if (!method) { showFieldErr('pay-method-err', 'pay-method');
+        bad = true; }
     if (bad) { showAlert('pay-error', 'Please fix the errors below.'); return; }
-
     var token = getToken();
     if (!token) { showAlert('pay-error', 'You must be logged in to subscribe.'); return; }
-
     var btn = document.getElementById('pay-btn');
     btn.disabled = true;
     btn.textContent = 'Processing…';
-
     var parts = plan.split('|');
     var planId = parts[0];
     var planName = parts[1];
     var planPrice = parseInt(parts[2]);
-
     try {
         var res = await fetch(MEMBERSHIP_API + '/subscribe', {
             method: 'POST',
@@ -604,11 +509,9 @@ function addToHistory(planName, price, method, subscription) {
     var tbody = document.getElementById('history-body');
     var emptyRow = tbody.querySelector('.empty-row');
     if (emptyRow) emptyRow.remove();
-
     var d = subscription && subscription.startDate ? new Date(subscription.startDate) : new Date();
     var dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     var methodLabel = { cash: 'Pay at Counter', card: 'Credit/Debit Card', online: 'Online Transfer' }[method] || method;
-
     var row = document.createElement('tr');
     row.innerHTML =
         '<td>' + dateStr + '</td>' +
@@ -638,17 +541,14 @@ function renderPaymentHistory(payments) {
     var emptyRow = tbody.querySelector('.empty-row');
     if (emptyRow) emptyRow.remove();
     tbody.innerHTML = '';
-
     var methodLabels = { cash: 'Pay at Counter', card: 'Credit/Debit Card', online: 'Online Transfer' };
     var statusClasses = { paid: 'paid', active: 'active', pending: 'pending', failed: 'failed' };
-
     payments.forEach(function(p) {
         var d = new Date(p.date || p.createdAt || p.startDate);
         var dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         var status = (p.status || 'paid').toLowerCase();
         var method = methodLabels[p.paymentMethod] || p.paymentMethod || '—';
         var planName = p.plan ? (p.plan.name || p.planName || '—') : (p.planName || '—');
-
         var row = document.createElement('tr');
         row.innerHTML =
             '<td>' + dateStr + '</td>' +
@@ -666,12 +566,7 @@ function showRenewalSection(sub) {
     renewalPlanId = sub.plan ? (sub.plan._id || '') : '';
     renewalPlanName = sub.plan ? (sub.plan.name || 'Current Plan') : 'Current Plan';
     renewalPrice = sub.plan ? (sub.plan.price || 0) : 0;
-
-    var endDate = new Date(sub.endDate).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
+    var endDate = new Date(sub.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
     document.getElementById('renew-current-plan').textContent = renewalPlanName;
     document.getElementById('renew-expiry').textContent = endDate;
     document.getElementById('renew-new-plan').textContent = renewalPlanName;
@@ -699,28 +594,22 @@ async function submitRenewal() {
     hideAlert('renew-error');
     document.getElementById('renew-method-err').classList.remove('show');
     document.getElementById('renew-method').classList.remove('error');
-
     var planVal = document.getElementById('renew-plan').value;
     var method = document.getElementById('renew-method').value;
-
     if (!method) {
         document.getElementById('renew-method-err').classList.add('show');
         document.getElementById('renew-method').classList.add('error');
         showAlert('renew-error', 'Please select a payment method.');
         return;
     }
-
     var token = getToken();
     if (!token) { showAlert('renew-error', 'You must be logged in to renew.'); return; }
-
     var selectedPlanId = planVal ? planVal.split('|')[0] : renewalPlanId;
     var chosenPlanName = planVal ? planVal.split('|')[1] : renewalPlanName;
     var chosenPrice = planVal ? parseInt(planVal.split('|')[2]) : renewalPrice;
-
     var btn = document.getElementById('renew-btn');
     btn.disabled = true;
     btn.textContent = 'Processing…';
-
     try {
         var res = await fetch(MEMBERSHIP_API + '/renew', {
             method: 'POST',
@@ -741,77 +630,82 @@ async function submitRenewal() {
 }
 
 // — Classes page —
-
 var classesLoaded = false;
 
 async function loadClasses() {
     if (classesLoaded) return;
-
     var grid = document.getElementById('classes-grid');
-
-    grid.innerHTML = `
-    <div class="classes-title-card">
-      <h2>🔥 Featured Gym Classes</h2>
-      <p>Join premium training sessions at Everest Fitness</p>
-    </div>
-  `;
-
-    // classes 
-    var classes = [{
-            name: "Yoga Flow Basics",
-            instructor: "Emma Watson",
-            time: "10:00 - 11:00",
-            date: "20 May 2026",
-            members: "12 / 20"
-        },
-        {
-            name: "HIIT Fat Burn",
-            instructor: "John Smith",
-            time: "12:00 - 13:00",
-            date: "21 May 2026",
-            members: "18 / 25"
-        },
-        {
-            name: "Strength Training Pro",
-            instructor: "Mike Johnson",
-            time: "15:00 - 16:00",
-            date: "22 May 2026",
-            members: "8 / 15"
-        },
-        {
-            name: "Cardio Blast",
-            instructor: "Sarah Lee",
-            time: "17:00 - 18:00",
-            date: "23 May 2026",
-            members: "5 / 20"
+    grid.innerHTML = '<div class="classes-loading"><i class="fas fa-spinner fa-spin"></i> Loading classes...</div>';
+    try {
+        var res = await fetch('http://localhost:5000/api/classes');
+        var data = await res.json();
+        var classes = data.classes || [];
+        if (!classes.length) {
+            grid.innerHTML = '<div class="plans-error">No classes available at the moment.</div>';
+            return;
         }
-    ];
-
-    classes.forEach(function(c) {
-        var card = document.createElement("div");
-        card.className = "class-card";
-
-        card.innerHTML = `
-      <div class="class-header">
-        <div class="class-icon">🏋️</div>
-        <h3>${c.name}</h3>
-      </div>
-
-      <p class="class-info">👨‍🏫 ${c.instructor}</p>
-      <p class="class-info">⏰ ${c.time}</p>
-      <p class="class-info">📅 ${c.date}</p>
-      <p class="class-info">👥 ${c.members}</p>
-
-      <button class="class-btn">Register</button>
-    `;
-
-        grid.appendChild(card);
-    });
-
-    classesLoaded = true;
+        grid.innerHTML = `
+            <div class="classes-title-card">
+                <h2>🔥 Featured Gym Classes</h2>
+                <p>Join premium training sessions at Everest Fitness</p>
+            </div>
+        `;
+        var token = getToken();
+        classes.forEach(function(c) {
+            var card = document.createElement("div");
+            card.className = "class-card";
+            var spotsLeft = c.capacity - (c.registeredMembers ? c.registeredMembers.length : 0);
+            var isFull = spotsLeft <= 0;
+            card.innerHTML = `
+                <div class="class-header">
+                    <div class="class-icon">🏋️</div>
+                    <h3>${c.name}</h3>
+                </div>
+                <p class="class-info">👨‍🏫 ${c.instructor}</p>
+                <p class="class-info">⏰ ${c.startTime} - ${c.endTime}</p>
+                <p class="class-info">📅 ${new Date(c.date).toLocaleDateString('en-GB')}</p>
+                <p class="class-info">👥 ${c.registeredMembers ? c.registeredMembers.length : 0} / ${c.capacity}</p>
+                <button class="class-btn"
+                    onclick="registerForClass('${c._id}', this)"
+                    ${isFull || !token ? 'disabled' : ''}>
+                    ${isFull ? 'Class Full' : !token ? 'Login to Register' : 'Register'}
+                </button>
+            `;
+            grid.appendChild(card);
+        });
+        classesLoaded = true;
+    } catch (e) {
+        grid.innerHTML = '<div class="plans-error">Could not load classes. Is the backend running?</div>';
+    }
 }
-// — Trainer Assignment (merged from assign_trainer) —
 
+async function registerForClass(classId, btn) {
+    var token = getToken();
+    if (!token) { alert('Please log in to register.'); return; }
+    btn.disabled = true;
+    btn.textContent = 'Booking...';
+    try {
+        var res = await fetch('http://localhost:5000/api/classes/' + classId + '/register', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        var data = await res.json();
+        if (!res.ok) {
+            alert(data.message || 'Could not register.');
+            btn.disabled = false;
+            btn.textContent = 'Register';
+            return;
+        }
+        btn.textContent = '✅ Booked!';
+        btn.style.background = 'green';
+    } catch (e) {
+        alert('Could not connect to server.');
+        btn.disabled = false;
+        btn.textContent = 'Register';
+    }
+}
+
+// — Trainer Assignment —
 var totalHours = 0;
 
 function clearTrainerForm() {
@@ -832,13 +726,11 @@ function createAssignmentRow(data) {
         '<td>' + data.sessionHours + '</td>' +
         '<td>' + data.notes + '</td>' +
         '<td><button class="delete-btn" type="button">Delete</button></td>';
-
     row.querySelector('.delete-btn').addEventListener('click', function() {
         row.remove();
         totalHours -= Number(data.sessionHours);
         document.getElementById('totalHours').textContent = totalHours;
     });
-
     tbody.appendChild(row);
 }
 
@@ -846,24 +738,20 @@ document.addEventListener('DOMContentLoaded', function() {
     var assignBtn = document.getElementById('assignButton');
     var resetBtn = document.getElementById('resetButton');
     if (!assignBtn) return;
-
     assignBtn.addEventListener('click', function() {
         var trainerName = document.getElementById('trainerName').value.trim();
         var classType = document.getElementById('classType').value;
         var sessionDate = document.getElementById('sessionDate').value;
         var sessionHours = document.getElementById('sessionHours').value;
         var notes = document.getElementById('notes').value.trim() || '—';
-
         if (!trainerName || !classType || !sessionDate || !sessionHours) {
             alert('Please complete all required fields.');
             return;
         }
-
         createAssignmentRow({ trainerName, classType, sessionDate, sessionHours, notes });
         totalHours += Number(sessionHours);
         document.getElementById('totalHours').textContent = totalHours;
         clearTrainerForm();
     });
-
     resetBtn.addEventListener('click', clearTrainerForm);
 });
